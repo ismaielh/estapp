@@ -1,8 +1,8 @@
 
-import 'package:estapps/screens/create_acount_screen.dart';
+import 'package:estapps/Features/create_acount_screen/presentation/views/create_acount_screen.dart';
 import 'package:go_router/go_router.dart';
-import 'package:estapps/screens/welcome_screen.dart';
-import 'package:estapps/screens/home_screen.dart';
+import 'package:estapps/Features/welcom_screen/presentation/views/welcome_screen.dart';
+import 'package:estapps/Features/home/presentation/views/home_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/welcome',
