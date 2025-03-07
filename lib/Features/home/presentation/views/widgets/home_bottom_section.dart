@@ -45,9 +45,9 @@ class BottomSection extends StatelessWidget {
                     title: "create_account".tr(),
                     onTap: () {
                       try {
-                        context.go(
+                        context.push(
                           AppRouter.createAccountScreenPath,
-                        ); // تصحيح المسار
+                        ); // استخدام push بدلاً من go
                       } catch (e) {
                         debugPrint('Navigation to /create-account failed: $e');
                       }
@@ -57,7 +57,9 @@ class BottomSection extends StatelessWidget {
                     icon: Icons.login,
                     title: "login".tr(),
                     onTap: () {
-                      context.go(AppRouter.loginScreenPath);
+                      context.push(
+                        AppRouter.loginScreenPath,
+                      ); // استخدام push بدلاً من go
                     },
                   ),
                   MenuItem(
@@ -66,7 +68,7 @@ class BottomSection extends StatelessWidget {
                     onTap: () {
                       // منطق التنقل إلى فيديو تعريفي (مثال)
                       debugPrint('Intro video tapped');
-                      // context.go('/intro-video'); // أضف المسار إذا كان موجودًا
+                      // context.push('/intro-video'); // أضف المسار إذا كان موجودًا
                     },
                   ),
                   MenuItem(
@@ -75,7 +77,7 @@ class BottomSection extends StatelessWidget {
                     onTap: () {
                       // منطق التنقل إلى صفحة حول البرنامج (مثال)
                       debugPrint('About program tapped');
-                      // context.go('/about'); // أضف المسار إذا كان موجودًا
+                      // context.push('/about'); // أضف المسار إذا كان موجودًا
                     },
                   ),
                 ],
