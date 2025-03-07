@@ -5,8 +5,8 @@ class Constants {
   // الألوان
   static const Color primaryColor = Color(0xff674AEF);
   static const Color backgroundColor = Colors.white;
-//الصور 
-static const String booksImage = 'assets/images/books.png';
+  //الصور
+  static const String booksImage = 'assets/images/books.png';
   // الأحجام والنسب
   static const double topSectionHeightRatio = 1.6;
   static const double bottomSectionHeightRatio = 2.6;

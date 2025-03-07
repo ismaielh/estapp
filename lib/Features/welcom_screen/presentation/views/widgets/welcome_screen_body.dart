@@ -1,6 +1,6 @@
-
 import 'package:estapps/Features/welcom_screen/presentation/views/widgets/bottom_section.dart';
 import 'package:estapps/Features/welcom_screen/presentation/views/widgets/top_background.dart';
+
 import 'package:estapps/core/bloc/language/language_bloc.dart';
 import 'package:estapps/core/bloc/language/language_event.dart';
 import 'package:estapps/core/bloc/language/language_state.dart';
@@ -19,7 +19,6 @@ class WelcomeScreenBody extends StatelessWidget {
 
     return BlocConsumer<LanguageBloc, LanguageState>(
       listener: (context, state) {
-        // تحديث اللغة في easy_localization عند تغيير الحالة
         devtools.log('Setting locale to: ${state.languageCode}');
         context.setLocale(Locale(state.languageCode));
       },
@@ -30,7 +29,7 @@ class WelcomeScreenBody extends StatelessWidget {
             height: mediaQuery.height,
             child: Stack(
               children: [
-                const TopBackground(), // الخلفية العلوية
+                const TopBackground(),
                 BottomSection(
                   selectedLanguage: state.languageCode,
                   onLanguageChanged: (newValue) {
