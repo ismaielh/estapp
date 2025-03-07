@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+ // استيراد ملف الجذور المنفصل
 import 'package:estapps/router.dart';
-import 'package:go_router/go_router.dart'; // استيراد ملف التوجيه
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'core/bloc/language/language_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -9,29 +11,27 @@ void main() async {
 
   runApp(
     EasyLocalization(
-      supportedLocales: [Locale('en'), Locale('ar')],
+      supportedLocales: const [Locale('en'), Locale('ar')],
       path: 'assets/translations',
-      fallbackLocale: Locale('ar'),
-      child: MyApp(),
+      fallbackLocale: const Locale('ar'),
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
-
-  final GoRouter _router = router; // استخدام التوجيه من router.dart
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      routerConfig: _router,
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
+    return BlocProvider(
+      create: (context) => LanguageBloc(),
+      child: MaterialApp.router(
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        routerConfig: AppRouter.router, // استخدام الراوتر من الملف المنفصل
+        debugShowCheckedModeBanner: false,
       ),
     );
   }

@@ -7,10 +7,12 @@ environment:
   sdk: ^3.7.0
 
 dependencies:
+  bloc: ^9.0.0
   cupertino_icons: ^1.0.8
   easy_localization: ^3.0.7
   flutter:
     sdk: flutter
+  flutter_bloc: ^9.1.0
   flutter_localizations:
     sdk: flutter
   go_router: ^14.8.1

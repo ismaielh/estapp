@@ -5,25 +5,28 @@ import 'package:go_router/go_router.dart';
 
 // مكون زر "Get Started" كـ StatelessWidget
 class GetStartedButton extends StatelessWidget {
-  final String selectedLanguage;
-
-  const GetStartedButton({super.key, required this.selectedLanguage});
+  const GetStartedButton({super.key, required String selectedLanguage});
 
   @override
   Widget build(BuildContext context) {
-    // تحديث الترجمة بناءً على اللغة الحالية (لكن ليس ضروريًا مع easy_localization)
     return Material(
       color: Constants.primaryColor,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         onTap: () {
-          context.go('/home'); // التنقل إلى الصفحة الرئيسية
+          try {
+            context.go('/home'); // التنقل إلى الصفحة الرئيسية
+          } catch (e) {
+            // تسجيل الخطأ إذا فشل التنقل
+            debugPrint('Navigation failed: $e');
+          }
         },
         child: Container(
           padding: Constants.buttonPadding,
           child: Text(
-            "get_started".tr(), // يجب أن يتغير تلقائيًا مع السياق
+            "get_started".tr(),
             style: Constants.buttonTextStyle,
+            textAlign: TextAlign.center, // تحسين محاذاة النص
           ),
         ),
       ),

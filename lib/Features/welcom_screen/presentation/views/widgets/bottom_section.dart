@@ -1,10 +1,8 @@
 import 'package:estapps/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-
 import 'language_dropdown.dart';
 import 'get_started_button.dart';
-
 
 // مكون الجزء السفلي كـ StatelessWidget
 class BottomSection extends StatelessWidget {
@@ -32,7 +30,9 @@ class BottomSection extends StatelessWidget {
           padding: Constants.sectionPadding,
           decoration: const BoxDecoration(
             color: Constants.backgroundColor,
-            borderRadius: BorderRadius.only(topLeft: Radius.circular(Constants.borderRadiusBottom)),
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(Constants.borderRadiusBottom),
+            ),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -56,7 +56,7 @@ class BottomSection extends StatelessWidget {
                 onChanged: onLanguageChanged,
               ),
               const SizedBox(height: 10),
-              GetStartedButton(selectedLanguage: selectedLanguage), // تمرير اللغة إلى الزر
+              GetStartedButton(selectedLanguage: selectedLanguage),
             ],
           ),
         ),

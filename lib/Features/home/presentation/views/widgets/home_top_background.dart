@@ -29,7 +29,7 @@ class TopBackground extends StatelessWidget {
           ),
           child: Center(
             child: Image.asset(
-              Constants.booksImage,
+              Constants.booksImage, // صورة الكتب في الخلفية
               scale: Constants.iconScale,
               errorBuilder: (context, error, stackTrace) {
                 // معالجة الحالة إذا فشل تحميل الصورة
