@@ -1,10 +1,10 @@
 {
-    "learning_is_everything": "Learning is Everything",
-    "learning_with_pleasure": "Learning with Pleasure with Dear Programmer, Wherever you are",
-    "get_started": "Get Started",
-    "select_language": "Select Language",
-    "welcome_to_app": "Welcome to EstApps",
-    "create_account_title": "Create Account",
+  "learning_is_everything": "Learning is Everything",
+  "learning_with_pleasure": "Learning with Pleasure with Dear Programmer, Wherever you are",
+  "get_started": "Get Started",
+  "select_language": "Select Language",
+  "welcome_to_app": "Welcome to EstApps",
+  "create_account_title": "Create Account",
   "student_name": "Student Name",
   "father_name": "Father Name",
   "family_name": "Family Name",
@@ -17,6 +17,11 @@
   "enter_family_name": "Enter family name",
   "enter_mobile_number": "Enter Syrian mobile number",
   "enter_username": "Enter username",
-  "enter_password": "Enter password"
-  }
- 
+  "enter_password": "Enter password",
+  "login_title": "Login",
+  "login_button": "Login",
+  "create_account": "Create Account",
+  "login": "Login", 
+  "intro_video": "Intro Video", 
+  "about_program": "About Program" 
+}

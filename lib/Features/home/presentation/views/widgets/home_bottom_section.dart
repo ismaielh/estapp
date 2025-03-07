@@ -1,4 +1,5 @@
 import 'package:estapps/constants.dart';
+import 'package:estapps/router.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
@@ -29,10 +30,7 @@ class BottomSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // نص الترحيب المترجم
-            Text(
-              "welcome_to_app".tr(),
-              style: Constants.titleTextStyle,
-            ),
+            Text("welcome_to_app".tr(), style: Constants.titleTextStyle),
             const SizedBox(height: 10), // مسافة بين النص والشبكة
             // شبكة العناصر بارتفاع ديناميكي
             Expanded(
@@ -47,7 +45,9 @@ class BottomSection extends StatelessWidget {
                     title: "create_account".tr(),
                     onTap: () {
                       try {
-                        context.go('/create-account');
+                        context.go(
+                          AppRouter.createAccountScreenPath,
+                        ); // تصحيح المسار
                       } catch (e) {
                         debugPrint('Navigation to /create-account failed: $e');
                       }
@@ -57,9 +57,7 @@ class BottomSection extends StatelessWidget {
                     icon: Icons.login,
                     title: "login".tr(),
                     onTap: () {
-                      // منطق التنقل إلى صفحة تسجيل الدخول (مثال)
-                      debugPrint('Login tapped');
-                      // context.go('/login'); // أضف المسار إذا كان موجودًا
+                      context.go(AppRouter.loginScreenPath);
                     },
                   ),
                   MenuItem(
