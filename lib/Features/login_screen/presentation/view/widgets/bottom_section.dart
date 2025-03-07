@@ -36,17 +36,19 @@ class BottomSection extends StatelessWidget {
         ),
         child: Column(
           // محاذاة العناصر في المنتصف عموديًا
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 15),
             // عرض عنوان الصفحة مترجمًا باستخدام easy_localization
             Text(
               "login_title".tr(),
-              style:
-                  Constants.titleTextStyle, // تطبيق نمط النص المحدد في الثوابت
+              style: Constants.titleTextStyle.copyWith(
+                fontSize: 40,
+              ), // تطبيق نمط النص المحدد في الثوابت
             ),
             const SizedBox(
               // إضافة مسافة عمودية كبيرة بين العنوان والنموذج
-              height: Constants.largeSpacingForLogin,
+              height: Constants.largeSpacingForLogin + 10,
             ),
             const CustomTextField(
               icon: Icons.account_circle,
@@ -55,7 +57,7 @@ class BottomSection extends StatelessWidget {
             ),
             const SizedBox(
               // إضافة مسافة عمودية متوسطة بين الحقول
-              height: Constants.mediumSpacingForLogin,
+              height: Constants.mediumSpacingForLogin + 5,
             ),
             const CustomTextField(
               icon: Icons.lock,
@@ -65,14 +67,18 @@ class BottomSection extends StatelessWidget {
             ),
             const SizedBox(
               // إضافة مسافة عمودية كبيرة بين النموذج والزر
-              height: Constants.largeSpacingForLogin,
+              height: Constants.largeSpacingForLogin + 40,
             ),
-            LoginButton(
-              // استدعاء زر تسجيل الدخول مع دالة عند الضغط
-              onTap: () {
-                // طباعة رسالة في وحدة التحكم عند الضغط على الزر
-                debugPrint('Login tapped');
-              },
+            SizedBox(
+              height: 50,
+              width: 250,
+              child: LoginButton(
+                // استدعاء زر تسجيل الدخول مع دالة عند الضغط
+                onTap: () {
+                  // طباعة رسالة في وحدة التحكم عند الضغط على الزر
+                  debugPrint('Login tapped');
+                },
+              ),
             ),
             SizedBox(
               // إضافة مسافة سفلية ديناميكية لتجنب تغطية المحتوى بلوحة المفاتيح

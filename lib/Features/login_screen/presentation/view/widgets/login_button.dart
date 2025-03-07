@@ -23,7 +23,7 @@ class LoginButton extends StatelessWidget {
             alignment: Alignment.center, // محاذاة النص في المنتصف
             child: Text(
               "login_button".tr(),
-              style: Constants.buttonTextStyle,
+              style: Constants.buttonTextStyle.copyWith(fontSize: 25),
               textAlign: TextAlign.center, // محاذاة النص داخل الزر
             ),
           ),

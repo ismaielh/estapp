@@ -1,4 +1,5 @@
 import 'package:estapps/constants.dart';
+import 'package:estapps/router.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +16,9 @@ class GetStartedButton extends StatelessWidget {
       child: InkWell(
         onTap: () {
           try {
-            context.go('/home'); // التنقل إلى الصفحة الرئيسية
+            context.push(
+              AppRouter.homeScreenPath,
+            ); // التنقل إلى الصفحة الرئيسية
           } catch (e) {
             // تسجيل الخطأ إذا فشل التنقل
             debugPrint('Navigation failed: $e');

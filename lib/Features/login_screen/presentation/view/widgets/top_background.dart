@@ -27,14 +27,19 @@ class TopBackground extends StatelessWidget {
               bottomRight: Radius.circular(Constants.borderRadiusBottom),
             ),
           ),
-          child: Center(
-            child: Image.asset(
-              Constants.booksImage,
-              scale: Constants.iconScale,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.error, color: Colors.red);
-              },
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+
+            children: [
+              SizedBox(height: 50),
+              Image.asset(
+                Constants.booksImage,
+                scale: Constants.iconScale - 0.15,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.error, color: Colors.red);
+                },
+              ),
+            ],
           ),
         ),
       ],

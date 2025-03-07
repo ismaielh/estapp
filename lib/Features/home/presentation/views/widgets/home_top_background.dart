@@ -27,15 +27,19 @@ class TopBackground extends StatelessWidget {
               bottomRight: Radius.circular(Constants.borderRadiusTop),
             ),
           ),
-          child: Center(
-            child: Image.asset(
-              Constants.booksImage, // صورة الكتب في الخلفية
-              scale: Constants.iconScale,
-              errorBuilder: (context, error, stackTrace) {
-                // معالجة الحالة إذا فشل تحميل الصورة
-                return const Icon(Icons.error, color: Colors.red);
-              },
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 40),
+              Image.asset(
+                Constants.booksImage, // صورة الكتب في الخلفية
+                scale: Constants.iconScale,
+                errorBuilder: (context, error, stackTrace) {
+                  // معالجة الحالة إذا فشل تحميل الصورة
+                  return const Icon(Icons.error, color: Colors.red);
+                },
+              ),
+            ],
           ),
         ),
       ],
