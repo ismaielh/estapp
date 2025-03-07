@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 
 // تعريف الصفحة الرئيسية كـ StatelessWidget
 class HomeScreen extends StatelessWidget {
@@ -86,6 +87,7 @@ class HomeScreen extends StatelessWidget {
                             icon: Icons.person_add,
                             title: "create_account".tr(),
                             onTap: () {
+                              context.go('/create-account');
                               // إضافة منطق التنقل إلى صفحة إنشاء الحساب
                             },
                           ),

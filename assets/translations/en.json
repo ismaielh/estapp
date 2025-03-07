@@ -4,8 +4,19 @@
     "get_started": "Get Started",
     "select_language": "Select Language",
     "welcome_to_app": "Welcome to EstApps",
-    "create_account": "Create Account",
-    "login": "Login",
-    "intro_video": "Intro Video",
-    "about_program": "About Program"
+    "create_account_title": "Create Account",
+  "student_name": "Student Name",
+  "father_name": "Father Name",
+  "family_name": "Family Name",
+  "mobile_number": "Mobile Number",
+  "username": "Username",
+  "password": "Password",
+  "create_account_button": "Create Account",
+  "enter_student_name": "Enter student name",
+  "enter_father_name": "Enter father name",
+  "enter_family_name": "Enter family name",
+  "enter_mobile_number": "Enter Syrian mobile number",
+  "enter_username": "Enter username",
+  "enter_password": "Enter password"
   }
+ 

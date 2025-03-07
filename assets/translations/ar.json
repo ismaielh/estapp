@@ -7,5 +7,19 @@
     "create_account": "إنشاء حساب",
     "login": "تسجيل الدخول",
     "intro_video": "فيديو تعريفي",
-    "about_program": "حول البرنامج"
+    "about_program": "حول البرنامج",
+   "create_account_title": "إنشاء حساب",
+  "student_name": "اسم الطالب",
+  "father_name": "اسم الأب",
+  "family_name": "الكنية",
+  "mobile_number": "رقم الموبايل السوري",
+  "username": "اسم المستخدم",
+  "password": "كلمة السر",
+  "create_account_button": "إنشاء الحساب",
+  "enter_student_name": "أدخل اسم الطالب",
+  "enter_father_name": "أدخل اسم الأب",
+  "enter_family_name": "أدخل الكنية",
+  "enter_mobile_number": "أدخل رقم الموبايل السوري",
+  "enter_username": "أدخل اسم المستخدم",
+  "enter_password": "أدخل كلمة السر"
   }
