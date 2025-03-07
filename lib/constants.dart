@@ -31,7 +31,7 @@ class Constants {
   static const double buttonPaddingVertical = 10.0;
   static const double buttonPaddingHorizontal = 60.0;
   static const double textPadding = 20.0;
-  static const double iconScale = 0.8;
+  static const double iconScale = 0.9;
   static const double textFieldWidthForCreateAccount =
       300.0; // لـ CreateAccountScreen
   static const double mediumSpacingForCreateAccount =

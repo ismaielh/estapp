@@ -14,27 +14,38 @@ class TopBackground extends StatelessWidget {
         // الخلفية البيضاء العلوية
         Container(
           width: mediaQuery.width,
-          height: mediaQuery.height / Constants.topSectionHeightRatioForCreateAccount,
+          height:
+              mediaQuery.height /
+              Constants.topSectionHeightRatioForCreateAccount,
           decoration: const BoxDecoration(color: Constants.backgroundColor),
         ),
         // الخلفية البنفسجية العلوية مع الصورة والمنحنى
         Container(
           width: mediaQuery.width,
-          height: mediaQuery.height / Constants.topSectionHeightRatioForCreateAccount,
+          height:
+              mediaQuery.height /
+              Constants.topSectionHeightRatioForCreateAccount,
           decoration: const BoxDecoration(
             color: Constants.primaryColor,
             borderRadius: BorderRadius.only(
               bottomRight: Radius.circular(Constants.borderRadiusBottom),
             ),
           ),
-          child: Center(
-            child: Image.asset(
-              Constants.booksImage,
-              scale: Constants.iconScale,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.error, color: Constants.errorColorForCreateAccount);
-              },
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start, // رفع الصورة للأعلى
+            children: [
+              SizedBox(height: 40), // إضافة مسافة علوية صغيرة للتعديل
+              Image.asset(
+                Constants.booksImage,
+                scale: Constants.iconScale,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.error,
+                    color: Constants.errorColorForCreateAccount,
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ],
