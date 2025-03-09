@@ -21,7 +21,11 @@
   "login_title": "تسجيل الدخول",
   "login_button": "تسجيل الدخول",
   "create_account": "إنشاء حساب",
-  "login": "تسجيل الدخول", 
+  "login": "تسجيل الدخول",
   "intro_video": "فيديو تعريفي",
-  "about_program": "حول البرنامج"
+  "about_program": "حول البرنامج",
+  "my_lessons": "دروسي",
+  "my_teacher": "استاذي", 
+  "my_mail": "بريدي", 
+  "activate": "تفعيل" 
 }

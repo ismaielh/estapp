@@ -2,8 +2,10 @@ import 'package:estapps/Features/create_acount_screen/presentation/views/widgets
 
 import 'package:estapps/Features/login_screen/presentation/view/widgets/login_button.dart';
 import 'package:estapps/constants.dart';
+import 'package:estapps/router.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 
 // مكون الجزء السفلي الذي يحتوي على نموذج تسجيل الدخول
 class BottomSection extends StatelessWidget {
@@ -75,7 +77,7 @@ class BottomSection extends StatelessWidget {
               child: LoginButton(
                 // استدعاء زر تسجيل الدخول مع دالة عند الضغط
                 onTap: () {
-                  // طباعة رسالة في وحدة التحكم عند الضغط على الزر
+                  context.pushReplacement(AppRouter.mainScreenPath);
                   debugPrint('Login tapped');
                 },
               ),

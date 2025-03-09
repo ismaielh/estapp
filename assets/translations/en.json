@@ -21,7 +21,11 @@
   "login_title": "Login",
   "login_button": "Login",
   "create_account": "Create Account",
-  "login": "Login", 
-  "intro_video": "Intro Video", 
-  "about_program": "About Program" 
+  "login": "Login",
+  "intro_video": "Intro Video",
+  "about_program": "About Program",
+  "my_lessons": "My Lessons",
+  "my_teacher": "My Teacher", 
+  "my_mail": "My Mail", 
+  "activate": "Activate" 
 }
