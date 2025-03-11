@@ -36,5 +36,12 @@
   "lesson_detail": "Lesson Detail",
   "lesson_id": "Lesson ID: {0}",
   "lesson_content": "This is the content of Lesson {0}. Enjoy learning!",
-  "back": "Back"
+  "back": "Back",
+  "units_title": "Units",
+  "lessons_title": "Lessons",
+  "no_units_available": "No units available",
+  "no_lessons_available": "No lessons available",
+  "activation_required": "Activation required",
+  "invalid_subject_data": "Invalid subject data",
+  "navigation_error": "Navigation error: {0}"
 }

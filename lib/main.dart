@@ -1,4 +1,5 @@
- // استيراد ملف الجذور المنفصل
+// استيراد ملف الجذور المنفصل
+import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
 import 'package:estapps/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,14 +25,24 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LanguageBloc(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<LanguageBloc>(create: (context) => LanguageBloc()),
+        BlocProvider<LessonsCubit>(
+          create:
+              (context) =>
+                  LessonsCubit()
+                    ..loadSubjects(), // تهيئة LessonsCubit وتحميل البيانات
+        ),
+      ],
       child: MaterialApp.router(
         localizationsDelegates: context.localizationDelegates,
         supportedLocales: context.supportedLocales,
         locale: context.locale,
         routerConfig: AppRouter.router, // استخدام الراوتر من الملف المنفصل
         debugShowCheckedModeBanner: false,
+        title: 'Estapps',
+        theme: ThemeData(primarySwatch: Colors.blue),
       ),
     );
   }

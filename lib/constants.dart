@@ -5,21 +5,17 @@ class Constants {
   // الألوان
   static const Color primaryColor = Color(0xff674AEF);
   static const Color backgroundColor = Colors.white;
-  static const Color textFieldFillColorForCreateAccount = Color(
-    0xFFF5F5F5,
-  ); // لـ CreateAccountScreen
+  static const Color textFieldFillColorForCreateAccount = Color(0xFFF5F5F5); // لـ CreateAccountScreen
   static const Color errorColorForCreateAccount = Colors.red; // لـ CreateAccountScreen
-  static const Color textFieldFillColorForLogin = Color(
-    0xFFF5F5F5,
-  ); // لون تعبئة حقل النص لـ LoginScreen
+  static const Color textFieldFillColorForLogin = Color(0xFFF5F5F5); // لون تعبئة حقل النص لـ LoginScreen
 
   // إضافة ألوان جديدة لصفحة دروسي
   static const Color inactiveColor = Colors.grey; // لون الوحدات والدروس غير المفعلة
   static const Color cardBackgroundColor = Color(0xFFF9F9F9); // لون خلفية الكاردات
+  static const Color activeColor = Color(0xff674AEF); // لون المفعل (الأصلي)
 
   // الصور
   static const String booksImage = 'assets/images/books.png';
-  // إضافة صورة لصفحة دروسي (اختياري)
   static const String lessonsImage = 'assets/images/lessons_icon.png';
 
   // الأحجام والنسب
@@ -76,7 +72,7 @@ class Constants {
   static const TextStyle subjectTextStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
-    color: Colors.black,
+    color: inactiveColor,
   );
   static const TextStyle unitTextStyle = TextStyle(
     fontSize: 16,
@@ -88,6 +84,11 @@ class Constants {
     fontWeight: FontWeight.normal,
     color: inactiveColor,
   );
+  static const TextStyle activeTextStyle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: activeColor,
+  );
 
   // المسافات
   static const EdgeInsets buttonPadding = EdgeInsets.symmetric(
@@ -98,4 +99,7 @@ class Constants {
 
   // إضافة مسافات جديدة
   static const EdgeInsets cardPadding = EdgeInsets.all(12.0); // حشوة الكارد
+
+  // ثوابت جديدة للتفعيل
+  static const double lessonPrice = 10.0; // سعر الدرس الثابت
 }
