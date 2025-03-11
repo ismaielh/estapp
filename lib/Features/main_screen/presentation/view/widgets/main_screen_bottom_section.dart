@@ -1,8 +1,10 @@
 import 'package:estapps/Features/main_screen/presentation/view/widgets/main_screen_grid_item.dart';
 
 import 'package:estapps/constants.dart';
+import 'package:estapps/router.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
 
 // الجزء السفلي للواجهة الرئيسية يحتوي على شبكة الخيارات
 class MainScreenBottomSection extends StatelessWidget {
@@ -28,10 +30,7 @@ class MainScreenBottomSection extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              "welcome_to_app".tr(),
-              style: Constants.titleTextStyle,
-            ),
+            Text("welcome_to_app".tr(), style: Constants.titleTextStyle),
             const SizedBox(height: 10),
             Expanded(
               child: GridView.count(
@@ -44,6 +43,7 @@ class MainScreenBottomSection extends StatelessWidget {
                     icon: Icons.book,
                     title: "my_lessons".tr(),
                     onTap: () {
+                      context.pushReplacement(AppRouter.myLessonsScreenPath);
                       debugPrint('My Lessons tapped');
                     },
                   ),
