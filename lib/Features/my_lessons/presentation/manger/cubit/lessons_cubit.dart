@@ -1,7 +1,8 @@
+import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_state.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'lessons_state.dart';
 import 'dart:developer' as developer;
+
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class Subject {
   final String id;
@@ -87,12 +88,14 @@ class Section {
   final String title;
   final bool isCompleted;
   final bool isActivated;
+  final String videoId;
 
   const Section({
     required this.id,
     required this.title,
     this.isCompleted = false,
     this.isActivated = false,
+    required this.videoId,
   });
 
   Section copyWith({
@@ -100,12 +103,14 @@ class Section {
     String? title,
     bool? isCompleted,
     bool? isActivated,
+    String? videoId,
   }) {
     return Section(
       id: id ?? this.id,
       title: title ?? this.title,
       isCompleted: isCompleted ?? this.isCompleted,
       isActivated: isActivated ?? this.isActivated,
+      videoId: videoId ?? this.videoId,
     );
   }
 }
@@ -130,15 +135,36 @@ class LessonsCubit extends Cubit<LessonsState> {
                   id: 'lesson1',
                   title: '1',
                   sections: [
-                    Section(id: 'sec1', title: 'Introduction'),
-                    Section(id: 'sec2', title: 'Main Content'),
+                    Section(
+                      id: 'sec1',
+                      title: 'Introduction',
+                      isActivated: true,
+                      videoId: 'dQw4w9WgXcQ', // معرف فيديو اختباري
+                    ),
+                    Section(
+                      id: 'sec2',
+                      title: 'Main Content',
+                      videoId: 'xyz123', // استبدل بمعرف فيديو صحيح
+                    ),
                   ],
                   isActivated: true,
                 ),
-                Lesson(id: 'lesson2', title: '2', sections: [
-                  Section(id: 'sec1', title: 'Introduction'),
-                  Section(id: 'sec2', title: 'Main Content'),
-                ]),
+                Lesson(
+                  id: 'lesson2',
+                  title: '2',
+                  sections: [
+                    Section(
+                      id: 'sec1',
+                      title: 'Introduction',
+                      videoId: 'abc456',
+                    ),
+                    Section(
+                      id: 'sec2',
+                      title: 'Main Content',
+                      videoId: 'def789',
+                    ),
+                  ],
+                ),
               ],
               isActivated: false,
             ),
@@ -146,14 +172,38 @@ class LessonsCubit extends Cubit<LessonsState> {
               id: 'unit2',
               title: '2',
               lessons: [
-                Lesson(id: 'lesson3', title: '3', sections: [
-                  Section(id: 'sec1', title: 'Introduction'),
-                  Section(id: 'sec2', title: 'Main Content'),
-                ]),
-                Lesson(id: 'lesson4', title: '4', sections: [
-                  Section(id: 'sec1', title: 'Introduction'),
-                  Section(id: 'sec2', title: 'Main Content'),
-                ]),
+                Lesson(
+                  id: 'lesson3',
+                  title: '3',
+                  sections: [
+                    Section(
+                      id: 'sec1',
+                      title: 'Introduction',
+                      videoId: 'ghi012',
+                    ),
+                    Section(
+                      id: 'sec2',
+                      title: 'Main Content',
+                      videoId: 'jkl345',
+                    ),
+                  ],
+                ),
+                Lesson(
+                  id: 'lesson4',
+                  title: '4',
+                  sections: [
+                    Section(
+                      id: 'sec1',
+                      title: 'Introduction',
+                      videoId: 'mno678',
+                    ),
+                    Section(
+                      id: 'sec2',
+                      title: 'Main Content',
+                      videoId: 'pqr901',
+                    ),
+                  ],
+                ),
               ],
               isActivated: false,
             ),
@@ -168,14 +218,38 @@ class LessonsCubit extends Cubit<LessonsState> {
               id: 'unit3',
               title: '1',
               lessons: [
-                Lesson(id: 'lesson5', title: '5', sections: [
-                  Section(id: 'sec1', title: 'Introduction'),
-                  Section(id: 'sec2', title: 'Main Content'),
-                ]),
-                Lesson(id: 'lesson6', title: '6', sections: [
-                  Section(id: 'sec1', title: 'Introduction'),
-                  Section(id: 'sec2', title: 'Main Content'),
-                ]),
+                Lesson(
+                  id: 'lesson5',
+                  title: '5',
+                  sections: [
+                    Section(
+                      id: 'sec1',
+                      title: 'Introduction',
+                      videoId: 'stu234',
+                    ),
+                    Section(
+                      id: 'sec2',
+                      title: 'Main Content',
+                      videoId: 'vwx567',
+                    ),
+                  ],
+                ),
+                Lesson(
+                  id: 'lesson6',
+                  title: '6',
+                  sections: [
+                    Section(
+                      id: 'sec1',
+                      title: 'Introduction',
+                      videoId: 'yza890',
+                    ),
+                    Section(
+                      id: 'sec2',
+                      title: 'Main Content',
+                      videoId: 'bcd123',
+                    ),
+                  ],
+                ),
               ],
               isActivated: false,
             ),
@@ -194,6 +268,18 @@ class LessonsCubit extends Cubit<LessonsState> {
         for (var unit in subject.units) {
           if (unit.lessons.isEmpty) {
             developer.log('LessonsCubit: Unit ${unit.title} in ${subject.title} has no lessons');
+          }
+          for (var lesson in unit.lessons) {
+            if (lesson.isActivated && lesson.sections.isNotEmpty && !lesson.sections[0].isActivated) {
+              final updatedSections = lesson.sections.asMap().map((index, section) {
+                if (index == 0) {
+                  return MapEntry(index, section.copyWith(isActivated: true));
+                }
+                return MapEntry(index, section);
+              }).values.toList();
+              unit.lessons[unit.lessons.indexOf(lesson)] = lesson.copyWith(sections: updatedSections);
+              developer.log('LessonsCubit: Activated first section for lesson ${lesson.id}');
+            }
           }
         }
       }
@@ -214,7 +300,7 @@ class LessonsCubit extends Cubit<LessonsState> {
             if (unit.id == unitId) {
               if (unit.lessons.isEmpty) {
                 developer.log('LessonsCubit: Unit $unitId has no lessons, cannot activate');
-                return unit; // لا نفعّل إذا كانت الدروس فارغة
+                return unit;
               }
               developer.log('LessonsCubit: Activating unit: ${unit.id}');
               return unit.copyWith(isActivated: true);
@@ -242,10 +328,16 @@ class LessonsCubit extends Cubit<LessonsState> {
                 if (lesson.id == lessonId) {
                   if (lesson.sections.isEmpty) {
                     developer.log('LessonsCubit: Lesson $lessonId has no sections, cannot activate');
-                    return lesson; // لا نفعّل إذا كانت المقاطع فارغة
+                    return lesson;
                   }
                   developer.log('LessonsCubit: Activating lesson: ${lesson.id}');
-                  return lesson.copyWith(isActivated: true);
+                  final updatedSections = lesson.sections.asMap().map((index, section) {
+                    if (index == 0 && !section.isActivated) {
+                      return MapEntry(index, section.copyWith(isActivated: true));
+                    }
+                    return MapEntry(index, section);
+                  }).values.toList();
+                  return lesson.copyWith(isActivated: true, sections: updatedSections);
                 }
                 return lesson;
               }).toList();
@@ -306,19 +398,22 @@ class LessonsCubit extends Cubit<LessonsState> {
             if (unit.id == unitId) {
               final updatedLessons = unit.lessons.map((lesson) {
                 if (lesson.id == lessonId) {
-                  final updatedSections = lesson.sections.map((section) {
+                  final updatedSections = lesson.sections.asMap().map((index, section) {
                     if (section.id == sectionId) {
                       developer.log('LessonsCubit: Completing section: ${section.id}');
-                      return section.copyWith(isCompleted: true);
+                      return MapEntry(index, section.copyWith(isCompleted: true));
                     }
-                    final sectionIndex = lesson.sections.indexOf(section);
-                    if (sectionIndex + 1 < lesson.sections.length &&
-                        lesson.sections[sectionIndex + 1].id == sectionId) {
-                      developer.log('LessonsCubit: Activating next section: ${section.id}');
-                      return section.copyWith(isActivated: true);
+                    return MapEntry(index, section);
+                  }).values.toList();
+
+                  final sectionIndex = lesson.sections.indexWhere((s) => s.id == sectionId);
+                  if (sectionIndex >= 0 && sectionIndex + 1 < lesson.sections.length) {
+                    final nextSection = lesson.sections[sectionIndex + 1];
+                    if (!nextSection.isActivated) {
+                      developer.log('LessonsCubit: Activating next section: ${nextSection.id}');
+                      updatedSections[sectionIndex + 1] = nextSection.copyWith(isActivated: true);
                     }
-                    return section;
-                  }).toList();
+                  }
                   return lesson.copyWith(sections: updatedSections);
                 }
                 return lesson;

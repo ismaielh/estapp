@@ -1,9 +1,14 @@
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
+import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_state.dart';
+import 'package:estapps/Features/my_lessons/presentation/view/lesson_section_screen.dart';
 import 'package:estapps/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:go_router/go_router.dart';
+import 'dart:developer' as developer;
 
+// تعليق: شاشة عرض الدروس المفعلة مع قوائم الأقسام
 class ActivatedLessonScreen extends StatefulWidget {
   final Map<String, dynamic> args;
 
@@ -14,7 +19,11 @@ class ActivatedLessonScreen extends StatefulWidget {
 }
 
 class _ActivatedLessonScreenState extends State<ActivatedLessonScreen> {
-  int currentSectionIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    developer.log('ActivatedLessonScreen: Initializing for lesson ${widget.args['lesson'].id}');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +33,7 @@ class _ActivatedLessonScreenState extends State<ActivatedLessonScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "${'lesson'.tr()} ${lesson.title}",
-          style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor),
-        ),
+        title: Text('${'lesson'.tr()} ${lesson.title}', style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor)),
         backgroundColor: Constants.primaryColor,
       ),
       body: Stack(
@@ -42,150 +48,89 @@ class _ActivatedLessonScreenState extends State<ActivatedLessonScreen> {
             ),
           ),
           SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: Constants.sectionPadding,
-                  child: Text(
-                    'sections_title'.tr(),
-                    style: Constants.titleTextStyle.copyWith(
-                      color: Constants.backgroundColor,
-                      fontSize: 24,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
-                    itemCount: lesson.sections.length,
-                    itemBuilder: (context, index) {
-                      final section = lesson.sections[index];
-                      return Card(
-                        elevation: Constants.cardElevation,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
-                        ),
-                        color: Constants.cardBackgroundColor,
-                        child: ListTile(
-                          title: Text(
-                            section.title,
-                            style: section.isActivated
-                                ? (section.isCompleted
-                                    ? Constants.lessonTextStyle
-                                    : Constants.activeTextStyle)
-                                : Constants.lessonTextStyle,
-                          ),
-                          leading: Icon(
-                            Icons.video_library,
-                            color: section.isActivated
-                                ? (section.isCompleted
-                                    ? Constants.inactiveColor
-                                    : Constants.activeColor)
-                                : Constants.inactiveColor,
-                          ),
-                          onTap: section.isActivated && !section.isCompleted
-                              ? () {
-                                  _showVideo(context, section);
-                                }
-                              : null,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+            child: BlocBuilder<LessonsCubit, LessonsState>(
+              builder: (context, state) {
+                if (state is LessonsLoaded) {
+                  final updatedLesson = state.subjects
+                      .expand((s) => s.units)
+                      .expand((u) => u.lessons)
+                      .firstWhere((l) => l.id == lesson.id, orElse: () => lesson);
 
-  void _showVideo(BuildContext context, Section section) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(section.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Video Placeholder'), // استبدل بمشغل فيديو حقيقي لاحقاً
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _showQuiz(context, section);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Constants.primaryColor,
-                padding: Constants.buttonPadding,
-              ),
-              child: Text('end_viewing'.tr(), style: Constants.buttonTextStyle),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+                  if (updatedLesson.sections.isEmpty) {
+                    return Center(child: Text('no_sections'.tr(), style: Constants.activationTitleTextStyle));
+                  }
 
-  void _showQuiz(BuildContext context, Section section) {
-    int score = 0;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('quiz_title'.tr()),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Question 1: Sample Question?'),
-            RadioListTile<int>(
-              title: const Text('Option 1'),
-              value: 1,
-              groupValue: score,
-              onChanged: (value) => setState(() => score = value ?? 0),
-            ),
-            RadioListTile<int>(
-              title: const Text('Option 2'),
-              value: 2,
-              groupValue: score,
-              onChanged: (value) => setState(() => score = value ?? 0),
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (score > 0) {
-                context.read<LessonsCubit>().completeSection(
-                      widget.args['unit'].id,
-                      widget.args['lesson'].id,
-                      section.id,
-                    );
-                if (score < 60) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: Text('retry'.tr()),
-                      content: Text('retry_message'.tr()),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text('ok'.tr()),
+                  return Column(
+                    children: [
+                      Padding(
+                        padding: Constants.sectionPadding,
+                        child: Text('sections_title'.tr(), style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor, fontSize: 24)),
+                      ),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
+                          itemCount: updatedLesson.sections.length,
+                          itemBuilder: (context, index) {
+                            final section = updatedLesson.sections[index];
+                            final isSectionLocked = _isSectionLocked(index, updatedLesson.sections);
+                            developer.log('Section $index: isActivated: ${section.isActivated}, isCompleted: ${section.isCompleted}, isLocked: $isSectionLocked');
+                            return Card(
+                              elevation: Constants.cardElevation,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Constants.cardBorderRadius)),
+                              color: isSectionLocked ? Constants.cardBackgroundColor.withOpacity(0.5) : Constants.cardBackgroundColor,
+                              child: ListTile(
+                                title: Text(
+                                  section.title,
+                                  style: section.isActivated
+                                      ? (section.isCompleted ? Constants.lessonTextStyle : Constants.activeTextStyle)
+                                      : Constants.lessonTextStyle.copyWith(color: isSectionLocked ? Colors.grey : null),
+                                ),
+                                leading: Icon(
+                                  isSectionLocked ? Icons.lock : Icons.video_library,
+                                  color: section.isActivated
+                                      ? (section.isCompleted ? Constants.inactiveColor : Constants.activeColor)
+                                      : Constants.inactiveColor,
+                                ),
+                                onTap: (section.isActivated && !section.isCompleted && !isSectionLocked)
+                                    ? () {
+                                        context.push(
+                                          '/lesson-section/${section.id}',
+                                          extra: {
+                                            'subject': subject,
+                                            'unit': unit,
+                                            'lesson': updatedLesson,
+                                            'section': section,
+                                          },
+                                        ).then((_) {
+                                          if (mounted) setState(() {});
+                                        });
+                                      }
+                                    : null,
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   );
                 }
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Constants.primaryColor,
-              padding: Constants.buttonPadding,
+                return const Center(child: CircularProgressIndicator());
+              },
             ),
-            child: Text('end_quiz'.tr(), style: Constants.buttonTextStyle),
           ),
         ],
       ),
     );
+  }
+
+  bool _isSectionLocked(int sectionIndex, List<Section> sections) {
+    if (sectionIndex == 0) return false;
+    for (int i = 0; i < sectionIndex; i++) {
+      final previousSection = sections[i];
+      if (previousSection.isActivated && !previousSection.isCompleted) {
+        return true;
+      }
+    }
+    return false;
   }
 }

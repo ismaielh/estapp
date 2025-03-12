@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:developer' as developer;
 
+// تعليق: شاشة "دروسي" التي تعرض قائمة المواد الدراسية
 class MyLessonsScreen extends StatelessWidget {
   const MyLessonsScreen({super.key});
 
@@ -15,6 +16,7 @@ class MyLessonsScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          // تعليق: خلفية متدرجة
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
@@ -27,6 +29,7 @@ class MyLessonsScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
+                // تعليق: عنوان الصفحة "دروسي"
                 Padding(
                   padding: Constants.sectionPadding,
                   child: Text(
@@ -37,6 +40,7 @@ class MyLessonsScreen extends StatelessWidget {
                     ),
                   ),
                 ),
+                // تعليق: قائمة المواد باستخدام BlocBuilder
                 Expanded(
                   child: BlocBuilder<LessonsCubit, LessonsState>(
                     builder: (context, state) {
@@ -66,15 +70,13 @@ class MyLessonsScreen extends StatelessWidget {
                               child: InkWell(
                                 onTap: () {
                                   try {
+                                    // تعليق: الانتقال إلى شاشة الوحدات
                                     developer.log('Navigating to /units/${subject.id}');
-                                    context.push(
-                                      '/units/${subject.id}',
-                                      extra: {'subject': subject},
-                                    );
+                                    context.push('/units/${subject.id}', extra: {'subject': subject});
                                   } catch (e) {
                                     developer.log('Navigation error: $e');
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Navigation error: $e')),
+                                      SnackBar(content: Text('navigation_error'.tr(args: [e.toString()]))),
                                     );
                                   }
                                 },
@@ -107,7 +109,7 @@ class MyLessonsScreen extends StatelessWidget {
                       } else if (state is LessonsError) {
                         return Center(child: Text(state.message));
                       }
-                      return const Center(child: Text('No subjects available'));
+                      return Center(child: Text('no_subjects_available'.tr()));
                     },
                   ),
                 ),

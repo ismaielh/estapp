@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:developer' as developer;
 
+// تعليق: شاشة الدروس التي تعرض قائمة الدروس داخل وحدة معينة
 class LessonsScreen extends StatelessWidget {
   final Map<String, dynamic> args;
 
@@ -14,24 +15,13 @@ class LessonsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subject = args['subject'] as Subject?;
-    final unit = args['unit'] as Unit?;
-
-    developer.log('LessonsScreen: Building with subject: ${subject?.title}, unit: ${unit?.title}');
-
-    if (subject == null || unit == null) {
-      developer.log('LessonsScreen: Invalid subject or unit data');
-      return Scaffold(
-        body: Center(
-          child: Text('Invalid subject or unit data'),
-        ),
-      );
-    }
+    final subject = args['subject'] as Subject;
+    final unit = args['unit'] as Unit;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "${'unit'.tr()} ${unit.title}",
+          'lessons_title'.tr(),
           style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor),
         ),
         backgroundColor: Constants.primaryColor,
@@ -63,28 +53,15 @@ class LessonsScreen extends StatelessWidget {
                 Expanded(
                   child: BlocBuilder<LessonsCubit, LessonsState>(
                     builder: (context, state) {
-                      developer.log('LessonsScreen: BlocBuilder state: $state');
                       if (state is LessonsLoading) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (state is LessonsLoaded) {
-                        final updatedSubject = state.subjects.firstWhere(
-                          (s) => s.id == subject.id,
-                          orElse: () {
-                            developer.log('LessonsScreen: Subject not found in updated state, using original');
-                            return subject;
-                          },
-                        );
-                        final updatedUnit = updatedSubject.units.firstWhere(
-                          (u) => u.id == unit.id,
-                          orElse: () {
-                            developer.log('LessonsScreen: Unit not found in updated state, using original');
-                            return unit;
-                          },
-                        );
+                        final updatedUnit = state.subjects
+                            .expand((s) => s.units)
+                            .firstWhere((u) => u.id == unit.id, orElse: () => unit);
                         final lessons = updatedUnit.lessons;
-                        developer.log('LessonsScreen: Lessons loaded: ${lessons.length}');
                         if (lessons.isEmpty) {
-                          return const Center(child: Text('No lessons available'));
+                          return Center(child: Text('no_lessons_available'.tr()));
                         }
                         return GridView.builder(
                           padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
@@ -97,51 +74,64 @@ class LessonsScreen extends StatelessWidget {
                           itemCount: lessons.length,
                           itemBuilder: (context, index) {
                             final lesson = lessons[index];
-                            developer.log('LessonsScreen: Building lesson card: ${lesson.title}');
+                            final isLessonActivated = lesson.isActivated;
+                            developer.log('LessonsScreen: Lesson ${lesson.title} activated: $isLessonActivated, sections: ${lesson.sections.length}');
+
                             return Card(
-                              elevation: Constants.cardElevation,
+                              elevation: isLessonActivated ? 8.0 : 4.0,
                               shape: RoundedRectangleBorder(
+                                side: isLessonActivated
+                                    ? BorderSide(color: Constants.activeColor, width: 2.0)
+                                    : BorderSide.none,
                                 borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
                               ),
-                              color: Constants.cardBackgroundColor,
                               child: InkWell(
-                                onTap: lesson.isActivated
-                                    ? () {
-                                        developer.log('LessonsScreen: Navigating to activated lesson: ${lesson.id}');
-                                        context.push(
-                                          '/activated-lesson/${lesson.id}',
-                                          extra: {'subject': subject, 'unit': unit, 'lesson': lesson},
-                                        );
-                                      }
-                                    : () {
-                                        developer.log('LessonsScreen: Navigating to activation screen for lesson: ${lesson.id}');
-                                        context.push(
-                                          '/activation',
-                                          extra: {'subject': subject, 'unit': unit, 'lesson': lesson},
-                                        );
-                                      },
+                                onTap: () {
+                                  if (!isLessonActivated) {
+                                    // تعليق: الانتقال إلى شاشة التفعيل إذا لم يكن الدرس مفعلاً
+                                    context.push('/activation', extra: {
+                                      'subject': subject,
+                                      'unit': unit,
+                                      'lesson': lesson,
+                                    });
+                                  } else {
+                                    // تعليق: الانتقال إلى شاشة الدرس المفعل
+                                    developer.log('Navigating to activated lesson ${lesson.id}');
+                                    context.push('/activated-lesson/${lesson.id}', extra: {
+                                      'subject': subject,
+                                      'unit': unit,
+                                      'lesson': lesson,
+                                    });
+                                  }
+                                },
                                 borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
-                                child: Padding(
-                                  padding: Constants.cardPadding,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        _getLessonIcon(lesson.title),
-                                        size: 50.0,
-                                        color: lesson.isActivated ? Constants.activeColor : Constants.inactiveColor,
-                                      ),
-                                      const SizedBox(height: Constants.smallSpacingForLessons),
-                                      Text(
-                                        "${'lesson'.tr()} ${lesson.title}",
-                                        style: lesson.isActivated
-                                            ? Constants.activeTextStyle
-                                            : Constants.lessonTextStyle,
-                                        textAlign: TextAlign.center,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: isLessonActivated ? Colors.white : Constants.cardBackgroundColor,
+                                    borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
+                                  ),
+                                  child: Padding(
+                                    padding: Constants.cardPadding,
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.bookmark,
+                                          size: 50.0,
+                                          color: isLessonActivated ? Constants.activeColor : Constants.inactiveColor,
+                                        ),
+                                        const SizedBox(height: Constants.smallSpacingForLessons),
+                                        Text(
+                                          'lesson'.tr() + ' ${lesson.title}',
+                                          style: isLessonActivated
+                                              ? Constants.activeTextStyle
+                                              : Constants.subjectTextStyle,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
@@ -149,10 +139,9 @@ class LessonsScreen extends StatelessWidget {
                           },
                         );
                       } else if (state is LessonsError) {
-                        developer.log('LessonsScreen: Error state: ${state.message}');
                         return Center(child: Text(state.message));
                       }
-                      return const Center(child: Text('No lessons available'));
+                      return Center(child: Text('no_lessons_available'.tr()));
                     },
                   ),
                 ),
@@ -162,17 +151,5 @@ class LessonsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  IconData _getLessonIcon(String title) {
-    final index = int.tryParse(title) ?? 0;
-    const icons = [
-      Icons.play_lesson,
-      Icons.video_library,
-      Icons.book,
-      Icons.school,
-      Icons.library_books,
-    ];
-    return icons[index % icons.length];
   }
 }

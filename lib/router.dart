@@ -1,7 +1,7 @@
 import 'package:estapps/Features/activation/presentation/view/activation_screen.dart';
+import 'package:estapps/Features/activation/presentation/view/select_activation_screen.dart';
 import 'package:estapps/Features/create_acount_screen/presentation/views/create_acount_screen.dart';
 import 'package:estapps/Features/home/presentation/views/home_screen.dart';
-import 'package:estapps/Features/lesson_details/presentation/view/widgets/lesson_detail_screen.dart';
 import 'package:estapps/Features/login_screen/presentation/view/login_screen.dart';
 import 'package:estapps/Features/main_screen/presentation/view/main_screen.dart';
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
@@ -9,6 +9,8 @@ import 'package:estapps/Features/my_lessons/presentation/view/lessons_screen.dar
 import 'package:estapps/Features/my_lessons/presentation/view/my_lessons_screen.dart';
 import 'package:estapps/Features/my_lessons/presentation/view/units_screen.dart';
 import 'package:estapps/Features/my_lessons/presentation/view/widgets/activated_lesson_screen.dart';
+import 'package:estapps/Features/my_lessons/presentation/view/lesson_section_screen.dart'; // إضافة المسار
+import 'package:estapps/Features/my_lessons/presentation/view/quiz_screen.dart'; // إضافة المسار
 import 'package:estapps/Features/welcom_screen/presentation/views/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -21,11 +23,13 @@ class AppRouter {
   static const String loginScreenPath = '/login';
   static const String mainScreenPath = '/main';
   static const String myLessonsScreenPath = '/my-lessons';
-  static const String lessonDetailScreenPath = '/lesson-detail';
-  static const String unitsScreenPath = '/units'; // مسار جديد
+  static const String unitsScreenPath = '/units';
   static const String lessonsScreenPath = '/lessons';
   static const String activationScreenPath = '/activation';
   static const String activatedLessonScreenPath = '/activated-lesson';
+  static const String selectActivationScreenPath = '/select-activation';
+  static const String lessonSectionScreenPath = '/lesson-section'; // مسار جديد
+  static const String quizScreenPath = '/quiz'; // مسار جديد
 
   static final GoRouter router = GoRouter(
     routes: [
@@ -52,13 +56,6 @@ class AppRouter {
       GoRoute(
         path: myLessonsScreenPath,
         builder: (context, state) => const MyLessonsScreen(),
-      ),
-      GoRoute(
-        path: '$lessonDetailScreenPath/:lessonId',
-        builder: (context, state) {
-          final lessonId = state.pathParameters['lessonId']!;
-          return LessonDetailScreen(lessonId: lessonId);
-        },
       ),
       GoRoute(
         path: '$unitsScreenPath/:subjectId',
@@ -115,6 +112,45 @@ class AppRouter {
           final unit = args['unit'] as Unit;
           final lesson = unit.lessons.firstWhere((l) => l.id == lessonId);
           return ActivatedLessonScreen(args: {'subject': subject, 'unit': unit, 'lesson': lesson});
+        },
+      ),
+      GoRoute(
+        path: selectActivationScreenPath,
+        builder: (context, state) => const SelectActivationScreen(),
+      ),
+      GoRoute(
+        path: '$lessonSectionScreenPath/:sectionId', // مسار جديد مع معرف القسم
+        builder: (context, state) {
+          final sectionId = state.pathParameters['sectionId']!;
+          developer.log('Navigating to lesson section screen with sectionId: $sectionId');
+          final args = state.extra as Map<String, dynamic>?;
+          if (args == null) {
+            developer.log('No extra data provided');
+            return const Scaffold(body: Center(child: Text('No data provided')));
+          }
+          final subject = args['subject'] as Subject;
+          final unit = args['unit'] as Unit;
+          final lesson = args['lesson'] as Lesson;
+          final section = lesson.sections.firstWhere(
+            (s) => s.id == sectionId,
+            orElse: () {
+              developer.log('Section not found with id: $sectionId');
+              return throw Exception('Section not found with id: $sectionId');
+            },
+          );
+          return LessonSectionScreen(args: {
+            'subject': subject,
+            'unit': unit,
+            'lesson': lesson,
+            'section': section,
+          });
+        },
+      ),
+      GoRoute(
+        path: quizScreenPath, // مسار جديد لشاشة الأسئلة
+        builder: (context, state) {
+          final args = state.extra as Map<String, dynamic>;
+          return QuizScreen(args: args);
         },
       ),
     ],

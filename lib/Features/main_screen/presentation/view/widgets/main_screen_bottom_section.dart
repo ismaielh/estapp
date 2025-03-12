@@ -1,5 +1,4 @@
 import 'package:estapps/Features/main_screen/presentation/view/widgets/main_screen_grid_item.dart';
-
 import 'package:estapps/constants.dart';
 import 'package:estapps/router.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +64,7 @@ class MainScreenBottomSection extends StatelessWidget {
                     icon: Icons.check_circle,
                     title: "activate".tr(),
                     onTap: () {
+                      context.push('/select-activation'); // الانتقال إلى الواجهة الجديدة
                       debugPrint('Activate tapped');
                     },
                   ),
