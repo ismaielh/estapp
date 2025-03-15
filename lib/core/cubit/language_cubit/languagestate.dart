@@ -1,4 +1,3 @@
-// حالة اللغة
 class LanguageState {
   final String languageCode;
 

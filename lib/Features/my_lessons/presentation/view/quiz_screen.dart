@@ -2,18 +2,17 @@ import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cu
 import 'package:estapps/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'dart:developer' as developer;
 
-// تعليق: شاشة الاختبار لقسم الدرس
 class QuizScreen extends StatefulWidget {
   final Map<String, dynamic> args;
 
   const QuizScreen({super.key, required this.args});
 
   @override
-  _QuizScreenState createState() => _QuizScreenState();
+  State<QuizScreen> createState() => _QuizScreenState();
 }
 
 class _QuizScreenState extends State<QuizScreen> {
@@ -44,152 +43,199 @@ class _QuizScreenState extends State<QuizScreen> {
     final section = widget.args['section'] as Section?;
 
     if (section == null || unit == null || lesson == null || subject == null) {
-      return Scaffold(
-        body: Center(
-          child: Text(
-            'missing_required_data'.tr(),
-            style: const TextStyle(color: Colors.red),
-          ),
-        ),
-      );
+      return const InvalidDataOverlay();
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'quiz_title'.tr(),
-          style: Constants.titleTextStyle.copyWith(
-            color: Constants.backgroundColor,
-          ),
-        ),
-        backgroundColor: Constants.primaryColor,
-      ),
+      appBar: AppBarWidget(),
       body: Stack(
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Constants.primaryColor, Constants.backgroundColor],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: Constants.sectionPadding,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        Text(
-                          'quiz_title'.tr(),
-                          style: Constants.activationTitleTextStyle,
-                        ),
-                        const SizedBox(
-                          height: Constants.smallSpacingForLessons,
-                        ),
-                        ...List.generate(questions.length, (i) {
-                          return Column(
-                            children: [
-                              Text(
-                                questions[i]['question']!,
-                                style: Constants.activationSubTextStyle,
-                              ),
-                              ...List.generate(4, (j) {
-                                return RadioListTile<String>(
-                                  title: Text(
-                                    questions[i]['options']![j],
-                                    style: Constants.activationSubTextStyle,
-                                  ),
-                                  value: questions[i]['options']![j],
-                                  groupValue:
-                                      questions[i]['selectedAnswer'] ?? '',
-                                  onChanged: (value) {
-                                    setState(() {
-                                      questions[i]['selectedAnswer'] = value;
-                                    });
-                                  },
-                                  activeColor: Constants.activeColor,
-                                );
-                              }),
-                              const SizedBox(height: 10),
-                            ],
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      int correctAnswers = 0;
-                      for (var q in questions) {
-                        if (q['selectedAnswer'] == q['correctAnswer']) {
-                          correctAnswers++;
-                        }
-                      }
-                      score =
-                          ((correctAnswers / questions.length) * 100).toInt();
-                      developer.log('Quiz score: $score');
-
-                      if (score >= 60) {
-                        context.read<LessonsCubit>().completeSection(
-                          unit.id,
-                          lesson.id,
-                          section.id,
-                        );
-                        developer.log(
-                          'Completed section ${section.id}, score: $score',
-                        );
-
-                        final currentIndex = lesson.sections.indexWhere(
-                          (s) => s.id == section.id,
-                        );
-                        final nextIndex = currentIndex + 1;
-
-                        if (nextIndex < lesson.sections.length) {
-                          final nextSection = lesson.sections[nextIndex];
-                          if (!nextSection.isActivated) {
-                            context.read<LessonsCubit>().activateSection(
-                              unit.id,
-                              lesson.id,
-                              nextSection.id,
-                            );
-                            developer.log(
-                              'Activated next section ${nextSection.id}',
-                            );
-                          }
-                        }
-                        context.pop(true); // إرجاع true للنجاح
-                      } else {
-                        // تعليق: عودة إلى الفيديو إذا رسب
-                        context.pushReplacement(
-                          '/lesson-section/${section.id}',
-                          extra: {
-                            'subject': subject,
-                            'unit': unit,
-                            'lesson': lesson,
-                            'section': section,
-                          },
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Constants.primaryColor,
-                      padding: Constants.buttonPadding,
-                    ),
-                    child: Text(
-                      'end_quiz'.tr(),
-                      style: Constants.buttonTextStyle,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          const GradientBackground(),
+          QuizContent(
+            questions: questions,
+            subject: subject,
+            unit: unit,
+            lesson: lesson,
+            section: section,
+            onEndQuiz: _handleEndQuiz,
           ),
         ],
       ),
+    );
+  }
+
+  void _handleEndQuiz(BuildContext context, Subject subject, Unit unit, Lesson lesson, Section section) {
+    int correctAnswers = 0;
+    for (var q in questions) {
+      if (q['selectedAnswer'] == q['correctAnswer']) {
+        correctAnswers++;
+      }
+    }
+    score = ((correctAnswers / questions.length) * 100).toInt();
+    developer.log('Quiz score: $score');
+
+    if (score >= 60) {
+      context.read<LessonsCubit>().completeSection(unit.id, lesson.id, section.id);
+      developer.log('Completed section ${section.id}, score: $score');
+
+      final currentIndex = lesson.sections.indexWhere((s) => s.id == section.id);
+      final nextIndex = currentIndex + 1;
+
+      if (nextIndex < lesson.sections.length) {
+        final nextSection = lesson.sections[nextIndex];
+        if (!nextSection.isActivated) {
+          context.read<LessonsCubit>().activateSection(unit.id, lesson.id, nextSection.id);
+          developer.log('Activated next section ${nextSection.id}');
+        }
+      }
+      context.pop(true);
+    } else {
+      context.pushReplacement(
+        '/lesson-section/${section.id}',
+        extra: {'subject': subject, 'unit': unit, 'lesson': lesson, 'section': section},
+      );
+    }
+  }
+}
+
+class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+  const AppBarWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      title: Text(
+        'quiz_title'.tr(), // "الاختبار" (ar) أو "Quiz" (en)
+        style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor),
+      ),
+      backgroundColor: Constants.primaryColor.withOpacity(0.9),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class GradientBackground extends StatelessWidget {
+  const GradientBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Constants.primaryColor.withOpacity(0.9),
+            Constants.primaryColor.withOpacity(0.5),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.1, 1.0],
+        ),
+      ),
+    );
+  }
+}
+
+class InvalidDataOverlay extends StatelessWidget {
+  const InvalidDataOverlay({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          'missing_required_data'.tr(), // "البيانات المطلوبة مفقودة" (ar) أو "Missing required data" (en)
+          style: const TextStyle(color: Colors.red),
+        ),
+      ),
+    );
+  }
+}
+
+class QuizContent extends StatelessWidget {
+  final List<Map<String, dynamic>> questions;
+  final Subject subject;
+  final Unit unit;
+  final Lesson lesson;
+  final Section section;
+  final void Function(BuildContext, Subject, Unit, Lesson, Section) onEndQuiz;
+
+  const QuizContent({
+    super.key,
+    required this.questions,
+    required this.subject,
+    required this.unit,
+    required this.lesson,
+    required this.section,
+    required this.onEndQuiz,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: Constants.sectionPadding,
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                children: [
+                  Text('quiz_title'.tr(), style: Constants.activationTitleTextStyle), // "الاختبار" (ar) أو "Quiz" (en)
+                  const SizedBox(height: Constants.smallSpacingForLessons),
+                  ...questions.map((q) => QuestionWidget(question: q)).toList(),
+                ],
+              ),
+            ),
+            EndQuizButton(onPressed: () => onEndQuiz(context, subject, unit, lesson, section)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class QuestionWidget extends StatefulWidget {
+  final Map<String, dynamic> question;
+
+  const QuestionWidget({super.key, required this.question});
+
+  @override
+  State<QuestionWidget> createState() => _QuestionWidgetState();
+}
+
+class _QuestionWidgetState extends State<QuestionWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(widget.question['question']!, style: Constants.activationSubTextStyle), // السؤال: مثل "ما هو 2+2؟" (ar) أو "What is 2+2?" (en)
+        ...List.generate(4, (j) {
+          return RadioListTile<String>(
+            title: Text(widget.question['options']![j], style: Constants.activationSubTextStyle), // الخيارات: مثل "3", "4", "5", "6"
+            value: widget.question['options']![j],
+            groupValue: widget.question['selectedAnswer'] ?? '',
+            onChanged: (value) => setState(() => widget.question['selectedAnswer'] = value),
+            activeColor: Constants.activeColor,
+          );
+        }),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+}
+
+class EndQuizButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const EndQuizButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(backgroundColor: Constants.primaryColor, padding: Constants.buttonPadding),
+      child: Text('end_quiz'.tr(), style: Constants.buttonTextStyle), // "إنهاء الاختبار" (ar) أو "End Quiz" (en)
     );
   }
 }

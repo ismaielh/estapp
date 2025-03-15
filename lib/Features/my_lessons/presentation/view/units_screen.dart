@@ -15,36 +15,37 @@ class UnitsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final subject = args['subject'] as Subject?;
-    // تعليق: التحقق من صحة بيانات المادة
     return Scaffold(
-      appBar: _buildAppBar(subject), // تعليق: شريط التطبيق مع عنوان المادة
+      appBar: AppBarWidget(subject: subject),
       body: Stack(
         children: [
-          _buildGradientBackground(), // تعليق: خلفية التدرج اللوني
+          const GradientBackground(),
           subject == null
-              ? _buildInvalidDataOverlay(
-                context,
-              ) // تعليق: طبقة عرض بيانات غير صالحة
-              : _buildMainContent(context, subject), // تعليق: المحتوى الرئيسي
+              ? const InvalidDataOverlay()
+              : MainContent(subject: subject),
         ],
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء شريط التطبيق مع نوع PreferredSizeWidget
-  PreferredSizeWidget _buildAppBar(Subject? subject) {
+class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
+  final Subject? subject;
+
+  const AppBarWidget({super.key, required this.subject});
+
+  @override
+  Widget build(BuildContext context) {
     return AppBar(
       title: Text(
-        subject?.title ?? 'units_title'.tr(),
+        subject?.title ??
+            'units_title'
+                .tr(), // عنوان الوحدات: اسم المادة أو "الوحدات" (ar) أو "Units" (en)
         style: Constants.titleTextStyle.copyWith(
           color: Colors.white,
           fontSize: 24,
-          shadows: [
-            const Shadow(
-              color: Colors.black26,
-              offset: Offset(1, 1),
-              blurRadius: 3,
-            ),
+          shadows: const [
+            Shadow(color: Colors.black26, offset: Offset(1, 1), blurRadius: 3),
           ],
         ),
       ),
@@ -53,29 +54,41 @@ class UnitsScreen extends StatelessWidget {
     );
   }
 
-  // تعليق: دالة لبناء خلفية التدرج اللوني مع تأثير ناعم
-  Widget _buildGradientBackground() {
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+}
+
+class GradientBackground extends StatelessWidget {
+  const GradientBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Constants.primaryColor.withOpacity(0.85),
-            Constants.backgroundColor.withOpacity(0.9),
+            Constants.primaryColor.withOpacity(0.9),
+            Constants.primaryColor.withOpacity(0.5),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          stops: const [0.2, 0.95],
+          stops: const [0.1, 1.0],
         ),
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء طبقة عرض بيانات غير صالحة
-  Widget _buildInvalidDataOverlay(BuildContext context) {
+class InvalidDataOverlay extends StatelessWidget {
+  const InvalidDataOverlay({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     developer.log('UnitsScreen: Invalid subject data');
     return Center(
       child: Text(
-        'invalid_subject_data'.tr(),
+        'invalid_subject_data'
+            .tr(), // "بيانات المادة غير صالحة" (ar) أو "Invalid subject data" (en)
         style: const TextStyle(
           color: Colors.red,
           fontSize: 18,
@@ -84,77 +97,92 @@ class UnitsScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء المحتوى الرئيسي مع منطقة آمنة
-  Widget _buildMainContent(BuildContext context, Subject subject) {
+class MainContent extends StatelessWidget {
+  final Subject subject;
+
+  const MainContent({super.key, required this.subject});
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
-        children: [
-          _buildSectionHeader(), // تعليق: العنوان الفرعي للوحدات
-          _buildUnitsGrid(context, subject), // تعليق: شبكة الوحدات
-        ],
+        children: [const SectionHeader(), UnitsGrid(subject: subject)],
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء العنوان الفرعي لقسم الوحدات
-  Widget _buildSectionHeader() {
+class SectionHeader extends StatelessWidget {
+  const SectionHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: Constants.sectionPadding,
       child: Text(
-        'units_title'.tr(),
+        'units_title'.tr(), // "الوحدات" (ar) أو "Units" (en)
         style: Constants.titleTextStyle.copyWith(
           color: Colors.white,
           fontSize: 26,
-          shadows: [
-            const Shadow(
-              color: Colors.black26,
-              offset: Offset(2, 2),
-              blurRadius: 4,
-            ),
+          shadows: const [
+            Shadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 4),
           ],
         ),
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء شبكة الوحدات باستخدام BlocBuilder
-  Widget _buildUnitsGrid(BuildContext context, Subject subject) {
+class UnitsGrid extends StatelessWidget {
+  final Subject subject;
+
+  const UnitsGrid({super.key, required this.subject});
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: BlocBuilder<LessonsCubit, LessonsState>(
         builder: (context, state) {
           return switch (state) {
-            LessonsLoading() => _buildLoadingIndicator(), // تعليق: حالة التحميل
-            LessonsLoaded(subjects: var subjects) => _buildLoadedUnits(
-              context,
-              subject,
-              subjects,
-            ), // تعليق: حالة العرض
-            LessonsError(message: var message) => _buildErrorMessage(
-              message,
-            ), // تعليق: حالة الخطأ
-            _ => _buildEmptyMessage(), // تعليق: حالة عدم وجود وحدات
+            LessonsLoading() => const LoadingIndicator(),
+            LessonsLoaded(subjects: var subjects) => LoadedUnits(
+              subject: subject,
+              subjects: subjects,
+            ),
+            LessonsError(message: var message) => ErrorMessage(
+              message: message,
+            ),
+            _ => const EmptyMessage(),
           };
         },
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء مؤشر التحميل أثناء جلب البيانات
-  Widget _buildLoadingIndicator() {
+class LoadingIndicator extends StatelessWidget {
+  const LoadingIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return const Center(
       child: CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation<Color>(Constants.activeColor),
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء شبكة الوحدات عند تحميل البيانات بنجاح
-  Widget _buildLoadedUnits(
-    BuildContext context,
-    Subject subject,
-    List<Subject> subjects,
-  ) {
+class LoadedUnits extends StatelessWidget {
+  final Subject subject;
+  final List<Subject> subjects;
+
+  const LoadedUnits({super.key, required this.subject, required this.subjects});
+
+  @override
+  Widget build(BuildContext context) {
     final updatedSubject = subjects.firstWhere(
       (s) => s.id == subject.id,
       orElse: () => subject,
@@ -163,9 +191,7 @@ class UnitsScreen extends StatelessWidget {
     developer.log(
       'UnitsScreen: Units loaded for ${subject.title}: ${units.length}',
     );
-    if (units.isEmpty) {
-      return _buildEmptyMessage();
-    }
+    if (units.isEmpty) return const EmptyMessage();
     return GridView.builder(
       padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -175,15 +201,20 @@ class UnitsScreen extends StatelessWidget {
         childAspectRatio: 1.2,
       ),
       itemCount: units.length,
-      itemBuilder: (context, index) {
-        final unit = units[index];
-        return _buildUnitItem(context, subject, unit); // تعليق: بناء كرت الوحدة
-      },
+      itemBuilder:
+          (context, index) => UnitItem(subject: subject, unit: units[index]),
     );
   }
+}
 
-  // تعليق: دالة لبناء كرت الوحدة الواحدة مع تأثير تفعيل
-  Widget _buildUnitItem(BuildContext context, Subject subject, Unit unit) {
+class UnitItem extends StatelessWidget {
+  final Subject subject;
+  final Unit unit;
+
+  const UnitItem({super.key, required this.subject, required this.unit});
+
+  @override
+  Widget build(BuildContext context) {
     final isUnitActivated = unit.lessons.any((lesson) => lesson.isActivated);
     developer.log(
       'UnitsScreen: Building unit card: ${unit.title}, activated: $isUnitActivated',
@@ -193,75 +224,20 @@ class UnitsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
       ),
-      color: isUnitActivated ? Colors.white : Colors.white.withOpacity(0.9),
+      color: isUnitActivated ? Colors.white : Colors.white.withOpacity(0.5),
       shadowColor: Constants.primaryColor.withOpacity(0.3),
       child: InkWell(
-        onTap:
-            () => _navigateToLessons(
-              context,
-              subject,
-              unit,
-            ), // تعليق: التنقل إلى الدروس
+        onTap: () => _navigateToLessons(context, subject, unit),
         borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
-        child: _buildUnitContent(
-          subject,
-          unit,
-          isUnitActivated,
-        ), // تعليق: محتوى الكرت
+        child: UnitContent(
+          subject: subject,
+          unit: unit,
+          isActivated: isUnitActivated,
+        ),
       ),
     );
   }
 
-  // تعليق: دالة لبناء محتوى كرت الوحدة (أيقونة ونص)
-  Widget _buildUnitContent(Subject subject, Unit unit, bool isActivated) {
-    return Padding(
-      padding: Constants.cardPadding,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildUnitIcon(subject, isActivated), // تعليق: الأيقونة الدائرية
-          const SizedBox(height: Constants.smallSpacingForLessons),
-          _buildUnitTitle(unit, isActivated), // تعليق: عنوان الوحدة
-        ],
-      ),
-    );
-  }
-
-  // تعليق: دالة لبناء الأيقونة الدائرية للوحدة مع تغيير اللون حسب التفعيل
-  Widget _buildUnitIcon(Subject subject, bool isActivated) {
-    return CircleAvatar(
-      radius: 30,
-      backgroundColor: Constants.primaryColor.withOpacity(
-        isActivated ? 0.2 : 0.1,
-      ),
-      child: Icon(
-        subject.icon ?? Icons.book,
-        size: 40.0,
-        color: isActivated ? Constants.activeColor : Constants.primaryColor,
-      ),
-    );
-  }
-
-  // تعليق: دالة لبناء عنوان الوحدة مع ترجمة وتنسيق حسب التفعيل
-  Widget _buildUnitTitle(Unit unit, bool isActivated) {
-    return Text(
-      '${'unit'.tr()} ${unit.title}',
-      style:
-          isActivated
-              ? Constants.activeTextStyle.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              )
-              : Constants.subjectTextStyle.copyWith(
-                color: Constants.primaryColor,
-              ),
-      textAlign: TextAlign.center,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  // تعليق: دالة لمعالجة التنقل إلى شاشة الدروس مع التعامل مع الأخطاء
   void _navigateToLessons(BuildContext context, Subject subject, Unit unit) {
     try {
       developer.log('UnitsScreen: Navigating to /lessons/${unit.id}');
@@ -276,24 +252,111 @@ class UnitsScreen extends StatelessWidget {
       );
     }
   }
+}
 
-  // تعليق: دالة لبناء رسالة الخطأ في حالة فشل تحميل البيانات
-  Widget _buildErrorMessage(String message) {
+class UnitContent extends StatelessWidget {
+  final Subject subject;
+  final Unit unit;
+  final bool isActivated;
+
+  const UnitContent({
+    super.key,
+    required this.subject,
+    required this.unit,
+    required this.isActivated,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: Constants.cardPadding,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          UnitIcon(subject: subject, isActivated: isActivated),
+          const SizedBox(height: Constants.smallSpacingForLessons),
+          UnitTitle(unit: unit, isActivated: isActivated),
+        ],
+      ),
+    );
+  }
+}
+
+class UnitIcon extends StatelessWidget {
+  final Subject subject;
+  final bool isActivated;
+
+  const UnitIcon({super.key, required this.subject, required this.isActivated});
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: 30,
+      backgroundColor: Constants.primaryColor.withOpacity(
+        isActivated ? 0.2 : 0.1,
+      ),
+      child: Icon(
+        subject.icon ?? Icons.book,
+        size: 40.0,
+        color: isActivated ? Constants.activeColor : Constants.primaryColor,
+      ),
+    );
+  }
+}
+
+class UnitTitle extends StatelessWidget {
+  final Unit unit;
+  final bool isActivated;
+
+  const UnitTitle({super.key, required this.unit, required this.isActivated});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '${'unit'.tr()} ${unit.title}', // "الوحدة 1" (ar) أو "Unit 1" (en)
+      style:
+          isActivated
+              ? Constants.activeTextStyle.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              )
+              : Constants.subjectTextStyle.copyWith(
+                color: Constants.primaryColor,
+              ),
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class ErrorMessage extends StatelessWidget {
+  final String message;
+
+  const ErrorMessage({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Text(
-        message,
+        message, // رسالة الخطأ: يجب أن تكون مترجمة
         style: Constants.descriptionTextStyle.copyWith(
           color: Constants.errorColorForCreateAccount,
         ),
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء رسالة في حالة عدم وجود وحدات متاحة
-  Widget _buildEmptyMessage() {
+class EmptyMessage extends StatelessWidget {
+  const EmptyMessage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'no_units_available'.tr(),
+        'no_units_available'
+            .tr(), // "لا توجد وحدات متاحة" (ar) أو "No units available" (en)
         style: Constants.descriptionTextStyle.copyWith(color: Colors.grey),
       ),
     );

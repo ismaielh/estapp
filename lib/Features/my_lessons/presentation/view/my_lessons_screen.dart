@@ -15,95 +15,108 @@ class MyLessonsScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          _buildGradientBackground(), // تعليق: خلفية التدرج اللوني
-          _buildMainContent(context), // تعليق: المحتوى الرئيسي للشاشة
+          const GradientBackground(),
+          const MainContent(),
         ],
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء خلفية التدرج اللوني مع تأثير قطري خفيف
-  Widget _buildGradientBackground() {
+class GradientBackground extends StatelessWidget {
+  const GradientBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Constants.primaryColor.withOpacity(0.9),
-            Constants.backgroundColor.withOpacity(0.95),
+            Constants.primaryColor.withOpacity(0.5),
           ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          stops: const [0.1, 0.9],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.1, 1.0],
         ),
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء المحتوى الرئيسي مع منطقة آمنة
-  Widget _buildMainContent(BuildContext context) {
+class MainContent extends StatelessWidget {
+  const MainContent({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
         children: [
-          _buildScreenHeader(), // تعليق: العنوان العلوي للشاشة
-          _buildSubjectsSection(context), // تعليق: قسم عرض المواد
+          const ScreenHeader(),
+          const SubjectsSection(),
         ],
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء العنوان العلوي مع نص مترجم وظل خفيف
-  Widget _buildScreenHeader() {
+class ScreenHeader extends StatelessWidget {
+  const ScreenHeader({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: Constants.sectionPadding,
       child: Text(
-        'my_lessons_title'.tr(),
+        'my_lessons_title'.tr(), // عنوان الشاشة: "دروسي" (ar) أو "My Lessons" (en)
         style: Constants.titleTextStyle.copyWith(
           color: Colors.white,
           fontSize: 30,
-          shadows: [
-            const Shadow(
-              color: Colors.black26,
-              offset: Offset(2, 2),
-              blurRadius: 4,
-            ),
-          ],
+          shadows: const [Shadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 4)],
         ),
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء قسم المواد باستخدام BlocBuilder لإدارة الحالات
-  Widget _buildSubjectsSection(BuildContext context) {
+class SubjectsSection extends StatelessWidget {
+  const SubjectsSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return Expanded(
       child: BlocBuilder<LessonsCubit, LessonsState>(
         builder: (context, state) {
           return switch (state) {
-            LessonsLoading() => _buildLoadingIndicator(), // تعليق: حالة التحميل
-            LessonsLoaded(subjects: var subjects) => _buildSubjectsGrid(
-              context,
-              subjects,
-            ), // تعليق: حالة عرض المواد
-            LessonsError(message: var message) => _buildErrorMessage(
-              message,
-            ), // تعليق: حالة الخطأ
-            _ => _buildEmptyMessage(), // تعليق: حالة عدم وجود بيانات
+            LessonsLoading() => const LoadingIndicator(),
+            LessonsLoaded(subjects: var subjects) => SubjectsGrid(subjects: subjects),
+            LessonsError(message: var message) => ErrorMessage(message: message),
+            _ => const EmptyMessage(),
           };
         },
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء مؤشر التحميل أثناء جلب البيانات
-  Widget _buildLoadingIndicator() {
+class LoadingIndicator extends StatelessWidget {
+  const LoadingIndicator({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return const Center(
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Constants.activeColor),
-      ),
+      child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Constants.activeColor)),
     );
   }
+}
 
-  // تعليق: دالة لبناء شبكة المواد عند تحميل البيانات بنجاح
-  Widget _buildSubjectsGrid(BuildContext context, List<Subject> subjects) {
+class SubjectsGrid extends StatelessWidget {
+  final List<Subject> subjects;
+
+  const SubjectsGrid({super.key, required this.subjects});
+
+  @override
+  Widget build(BuildContext context) {
     developer.log('Subjects loaded: ${subjects.length}');
     return GridView.builder(
       padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
@@ -114,80 +127,32 @@ class MyLessonsScreen extends StatelessWidget {
         childAspectRatio: 1.2,
       ),
       itemCount: subjects.length,
-      itemBuilder: (context, index) {
-        final subject = subjects[index];
-        developer.log(
-          'Processing subject: ${subject.title}, units: ${subject.units.length}',
-        );
-        return _buildSubjectItem(context, subject); // تعليق: بناء عنصر المادة
-      },
+      itemBuilder: (context, index) => SubjectItem(subject: subjects[index]),
     );
   }
+}
 
-  // تعليق: دالة لبناء كرت المادة الواحدة مع أيقونة دائرية وتأثير النقر
-  Widget _buildSubjectItem(BuildContext context, Subject subject) {
+class SubjectItem extends StatelessWidget {
+  final Subject subject;
+
+  const SubjectItem({super.key, required this.subject});
+
+  @override
+  Widget build(BuildContext context) {
+    developer.log('Processing subject: ${subject.title}, units: ${subject.units.length}');
     return Card(
       elevation: 6.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4)),
       color: Colors.white.withOpacity(0.95),
       shadowColor: Constants.primaryColor.withOpacity(0.3),
       child: InkWell(
-        onTap:
-            () => _navigateToUnits(
-              context,
-              subject,
-            ), // تعليق: التنقل إلى شاشة الوحدات
+        onTap: () => _navigateToUnits(context, subject),
         borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
-        child: _buildSubjectContent(subject), // تعليق: محتوى الكرت
+        child: SubjectContent(subject: subject),
       ),
     );
   }
 
-  // تعليق: دالة لبناء محتوى كرت المادة (أيقونة ونص)
-  Widget _buildSubjectContent(Subject subject) {
-    return Padding(
-      padding: Constants.cardPadding,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildSubjectIcon(subject), // تعليق: الأيقونة الدائرية
-          const SizedBox(height: Constants.smallSpacingForLessons),
-          _buildSubjectTitle(subject), // تعليق: عنوان المادة
-        ],
-      ),
-    );
-  }
-
-  // تعليق: دالة لبناء الأيقونة الدائرية للمادة
-  Widget _buildSubjectIcon(Subject subject) {
-    return CircleAvatar(
-      radius: 30,
-      backgroundColor: Constants.primaryColor.withOpacity(0.1),
-      child: Icon(
-        subject.icon ?? Icons.book,
-        size: 40.0,
-        color: Constants.primaryColor,
-      ),
-    );
-  }
-
-  // تعليق: دالة لبناء عنوان المادة مع تنسيق نصي محسّن
-  Widget _buildSubjectTitle(Subject subject) {
-    return Text(
-      subject.title,
-      style: Constants.subjectTextStyle.copyWith(
-        color: Constants.primaryColor,
-        fontWeight: FontWeight.bold,
-      ),
-      textAlign: TextAlign.center,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  // تعليق: دالة لمعالجة التنقل إلى شاشة الوحدات مع التعامل مع الأخطاء
   void _navigateToUnits(BuildContext context, Subject subject) {
     try {
       developer.log('Navigating to /units/${subject.id}');
@@ -199,24 +164,92 @@ class MyLessonsScreen extends StatelessWidget {
       );
     }
   }
+}
 
-  // تعليق: دالة لبناء رسالة الخطأ في حالة فشل تحميل البيانات
-  Widget _buildErrorMessage(String message) {
-    return Center(
-      child: Text(
-        message,
-        style: Constants.descriptionTextStyle.copyWith(
-          color: Constants.errorColorForCreateAccount,
-        ),
+class SubjectContent extends StatelessWidget {
+  final Subject subject;
+
+  const SubjectContent({super.key, required this.subject});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: Constants.cardPadding,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SubjectIcon(subject: subject),
+          const SizedBox(height: Constants.smallSpacingForLessons),
+          SubjectTitle(subject: subject),
+        ],
       ),
     );
   }
+}
 
-  // تعليق: دالة لبناء رسالة في حالة عدم وجود مواد متاحة
-  Widget _buildEmptyMessage() {
+class SubjectIcon extends StatelessWidget {
+  final Subject subject;
+
+  const SubjectIcon({super.key, required this.subject});
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: 30,
+      backgroundColor: Constants.primaryColor.withOpacity(0.1),
+      child: Icon(
+        subject.icon ?? Icons.book,
+        size: 40.0,
+        color: Constants.primaryColor,
+      ),
+    );
+  }
+}
+
+class SubjectTitle extends StatelessWidget {
+  final Subject subject;
+
+  const SubjectTitle({super.key, required this.subject});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      subject.title, // عنوان المادة: مثل "Mathematics" أو ترجمتها
+      style: Constants.subjectTextStyle.copyWith(
+        color: Constants.primaryColor,
+        fontWeight: FontWeight.bold,
+      ),
+      textAlign: TextAlign.center,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class ErrorMessage extends StatelessWidget {
+  final String message;
+
+  const ErrorMessage({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'no_subjects_available'.tr(),
+        message, // رسالة الخطأ: يجب أن تكون مترجمة في ملفات الترجمة
+        style: Constants.descriptionTextStyle.copyWith(color: Constants.errorColorForCreateAccount),
+      ),
+    );
+  }
+}
+
+class EmptyMessage extends StatelessWidget {
+  const EmptyMessage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'no_subjects_available'.tr(), // "لا توجد مواد متاحة" (ar) أو "No subjects available" (en)
         style: Constants.descriptionTextStyle.copyWith(color: Colors.grey),
       ),
     );
