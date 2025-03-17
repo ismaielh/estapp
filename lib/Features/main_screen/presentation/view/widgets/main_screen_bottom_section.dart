@@ -50,6 +50,7 @@ class MainScreenBottomSection extends StatelessWidget {
                     icon: Icons.person,
                     title: "my_teacher".tr(),
                     onTap: () {
+                      context.push(AppRouter.gradeSelectionScreenPath);
                       debugPrint('My Teacher tapped');
                     },
                   ),
@@ -64,7 +65,7 @@ class MainScreenBottomSection extends StatelessWidget {
                     icon: Icons.check_circle,
                     title: "activate".tr(),
                     onTap: () {
-                      context.push('/select-activation'); // الانتقال إلى الواجهة الجديدة
+                      context.push(AppRouter.activationScreenPath);
                       debugPrint('Activate tapped');
                     },
                   ),

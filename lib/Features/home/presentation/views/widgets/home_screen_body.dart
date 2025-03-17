@@ -1,7 +1,7 @@
 import 'package:estapps/Features/home/presentation/views/widgets/home_bottom_section.dart';
 import 'package:estapps/Features/home/presentation/views/widgets/home_top_background.dart';
 import 'package:estapps/core/cubit/language_cubit/languagestate.dart';
-import 'package:estapps/core/cubit/languagecubit.dart';
+import 'package:estapps/core/cubit/language_cubit/languagecubit.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

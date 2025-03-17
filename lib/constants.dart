@@ -97,7 +97,14 @@ class Constants {
     letterSpacing: 1,
   );
 
-  // إضافة أنماط نصية جديدة لصفحة دروسي
+  // إضافة أنماط نصية جديدة
+  static const TextStyle bodyTextStyle = TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.normal,
+    color: textColor,
+  );
+
+  // إضافة أنماط نصية لصفحة دروسي
   static const TextStyle subjectTextStyle = TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,

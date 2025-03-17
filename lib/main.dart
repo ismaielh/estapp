@@ -1,6 +1,6 @@
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
 import 'package:estapps/core/cubit/language_cubit/languagestate.dart';
-import 'package:estapps/core/cubit/languagecubit.dart';
+import 'package:estapps/core/cubit/language_cubit/languagecubit.dart';
 import 'package:estapps/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
