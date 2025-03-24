@@ -1,3 +1,6 @@
+// lib/Features/my_lessons/presentation/view/lessons_screen.dart
+import 'package:estapps/Features/my_lessons/data/models/subject.dart';
+
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_state.dart';
 import 'package:estapps/constants.dart';
@@ -7,31 +10,37 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:developer' as developer;
 
+// تعليق: شاشة الدروس لِوحدة معينة، تعرض قائمة الدروس مع إمكانية التنقل إلى التفعيل أو الدرس المفعل
 class LessonsScreen extends StatelessWidget {
-  final Map<String, dynamic> args;
+  final Subject subject;
+  final Unit unit;
+  final LessonsCubit lessonsCubit;
 
-  const LessonsScreen({super.key, required this.args});
+  const LessonsScreen({
+    super.key,
+    required this.subject,
+    required this.unit,
+    required this.lessonsCubit,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final subject = args['subject'] as Subject?;
-    final unit = args['unit'] as Unit?;
-    if (subject == null || unit == null) {
-      developer.log('LessonsScreen: Invalid subject or unit data');
-      return const InvalidDataOverlay();
-    }
-    return Scaffold(
-      appBar: AppBarWidget(subject: subject, unit: unit),
-      body: Stack(
-        children: [
-          const GradientBackground(),
-          MainContent(subject: subject, unit: unit),
-        ],
+    return BlocProvider.value(
+      value: lessonsCubit, // تعليق: تمرير LessonsCubit الموجود لإدارة الحالة
+      child: Scaffold(
+        appBar: AppBarWidget(subject: subject, unit: unit),
+        body: Stack(
+          children: [
+            const GradientBackground(), // تعليق: خلفية تدرجية لتحسين الشكل
+            MainContent(subject: subject, unit: unit),
+          ],
+        ),
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض شريط التطبيق مع عنوان المادة والوحدة
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   final Subject subject;
   final Unit unit;
@@ -42,14 +51,8 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(
-        '${'unit'.tr()} ${unit.title}', // "الوحدة 1" (ar) أو "Unit 1" (en)
-        style: Constants.titleTextStyle.copyWith(
-          color: Colors.white,
-          fontSize: 24,
-          shadows: const [
-            Shadow(color: Colors.black26, offset: Offset(1, 1), blurRadius: 3),
-          ],
-        ),
+        '${subject.title} - ${'unit'.tr()} ${unit.title}',
+        style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor),
       ),
       backgroundColor: Constants.primaryColor.withOpacity(0.9),
       elevation: 4,
@@ -60,6 +63,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
+// تعليق: ويدجت لعرض خلفية تدرجية تمتد عبر الشاشة
 class GradientBackground extends StatelessWidget {
   const GradientBackground({super.key});
 
@@ -70,38 +74,17 @@ class GradientBackground extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Constants.primaryColor.withOpacity(0.9),
-            Constants.primaryColor.withOpacity(0.5),
+            Constants.secondaryColor.withOpacity(0.6),
           ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.1, 1.0],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
     );
   }
 }
 
-class InvalidDataOverlay extends StatelessWidget {
-  const InvalidDataOverlay({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text(
-          'invalid_unit_data'
-              .tr(), // "بيانات الوحدة غير صالحة" (ar) أو "Invalid unit data" (en)
-          style: const TextStyle(
-            color: Colors.red,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
+// تعليق: ويدجت لعرض المحتوى الرئيسي، يحتوي على قسم الدروس
 class MainContent extends StatelessWidget {
   final Subject subject;
   final Unit unit;
@@ -113,80 +96,46 @@ class MainContent extends StatelessWidget {
     return SafeArea(
       child: Column(
         children: [
-          const SectionHeader(),
-          LessonsList(subject: subject, unit: unit),
+          LessonsSection(subject: subject, unit: unit), // تعليق: قسم عرض الدروس
         ],
       ),
     );
   }
 }
 
-class SectionHeader extends StatelessWidget {
-  const SectionHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: Constants.sectionPadding,
-      child: Text(
-        'lessons_title'.tr(), // "الدروس" (ar) أو "Lessons" (en)
-        style: Constants.titleTextStyle.copyWith(
-          color: Colors.white,
-          fontSize: 26,
-          shadows: const [
-            Shadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 4),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class LessonsList extends StatelessWidget {
+// تعليق: ويدجت لعرض قسم الدروس بناءً على حالة LessonsCubit
+class LessonsSection extends StatelessWidget {
   final Subject subject;
   final Unit unit;
 
-  const LessonsList({super.key, required this.subject, required this.unit});
+  const LessonsSection({super.key, required this.subject, required this.unit});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: BlocBuilder<LessonsCubit, LessonsState>(
         builder: (context, state) {
-          if (state is LessonsLoading) return const LoadingIndicator();
-          if (state is LessonsLoaded) {
-            final updatedUnit = state.subjects
-                .expand((s) => s.units)
-                .firstWhere((u) => u.id == unit.id, orElse: () => unit);
-            final lessons = updatedUnit.lessons;
-            if (lessons.isEmpty) return const EmptyMessage();
-            return ListView.builder(
-              padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
-              itemCount: lessons.length,
-              itemBuilder: (context, index) {
-                final lesson = lessons[index];
-                final isLessonActivated = lesson.isActivated;
-                developer.log(
-                  'LessonsScreen: Lesson ${lesson.title} activated: $isLessonActivated, sections: ${lesson.sections.length}',
-                );
-                return LessonItem(
-                  subject: subject,
-                  unit: unit,
-                  lesson: lesson,
-                  isLessonActivated: isLessonActivated,
-                );
-              },
-            );
-          }
-          if (state is LessonsError)
-            return ErrorMessage(message: state.message);
-          return const EmptyMessage();
+          return switch (state) {
+            LessonsLoading() => const LoadingIndicator(), // تعليق: عرض مؤشر التحميل
+            LessonsLoaded(subjects: var subjects) => LessonsList(
+                subject: subject,
+                unit: unit,
+                lessons: subjects
+                    .firstWhere((s) => s.id == subject.id)
+                    .units
+                    .firstWhere((u) => u.id == unit.id)
+                    .lessons,
+              ),
+            LessonsError(message: var message) => ErrorMessage(message: message),
+            _ => const EmptyMessage(), // تعليق: عرض رسالة إذا لم تكن الحالة صالحة
+          };
         },
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض مؤشر التحميل أثناء جلب البيانات
 class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({super.key});
 
@@ -200,74 +149,120 @@ class LoadingIndicator extends StatelessWidget {
   }
 }
 
+// تعليق: ويدجت لعرض قائمة الدروس في تخطيط عمودي
+class LessonsList extends StatelessWidget {
+  final Subject subject;
+  final Unit unit;
+  final List<Lesson> lessons;
+
+  const LessonsList({
+    super.key,
+    required this.subject,
+    required this.unit,
+    required this.lessons,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    developer.log('Lessons loaded for unit ${unit.id}: ${lessons.length}');
+    if (lessons.isEmpty) return const EmptyMessage();
+    return ListView.builder(
+      padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
+      itemCount: lessons.length,
+      itemBuilder: (context, index) => LessonItem(
+        subject: subject,
+        unit: unit,
+        lesson: lessons[index],
+      ),
+    );
+  }
+}
+
+// تعليق: ويدجت لعرض عنصر درس فردي مع إمكانية النقر للانتقال إلى الدرس أو التفعيل
 class LessonItem extends StatelessWidget {
   final Subject subject;
   final Unit unit;
   final Lesson lesson;
-  final bool isLessonActivated;
 
   const LessonItem({
     super.key,
     required this.subject,
     required this.unit,
     required this.lesson,
-    required this.isLessonActivated,
   });
+
+  // تعليق: دالة لتحديد التنقل بناءً على حالة تفعيل الدرس
+  void _navigate(BuildContext context) {
+    try {
+      final lessonsCubit = context.read<LessonsCubit>();
+      if (lesson.isActivated) {
+        developer.log('Navigating to /my-lessons/activated-lesson/${lesson.id}');
+        context.push(
+          '/my-lessons/activated-lesson/${lesson.id}',
+          extra: {
+            'subject': subject,
+            'unit': unit,
+            'lesson': lesson,
+            'lessonsCubit': lessonsCubit,
+          },
+        );
+      } else {
+        developer.log('Navigating to /my-lessons/activation for lesson ${lesson.id}');
+        context.push(
+          '/my-lessons/activation',
+          extra: {
+            'subject': subject,
+            'unit': unit,
+            'lesson': lesson,
+            'lessonsCubit': lessonsCubit,
+          },
+        );
+      }
+      // إضافة خيار للتنقل إلى LessonSectionScreen إذا كان لديك قسم معين
+      final section = lesson.sections?.first; // افتراض أن Lesson يحتوي على قائمة أقسام
+      if (section != null && lesson.isActivated) {
+        developer.log('Navigating to /my-lessons/lesson-section/${section.id}');
+        context.push(
+          '/my-lessons/lesson-section/${section.id}',
+          extra: {
+            'subject': subject,
+            'unit': unit,
+            'lesson': lesson,
+            'section': section,
+            'lessonsCubit': lessonsCubit,
+          },
+        );
+      }
+    } catch (e) {
+      developer.log('Navigation error: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('navigation_error'.tr(args: [e.toString()]))),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(
-        vertical: Constants.smallSpacingForLessons,
-      ),
-      elevation: isLessonActivated ? 8.0 : 5.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
-      ),
-      color:
-          isLessonActivated
-              ? Colors.white.withOpacity(0.9)
-              : Colors.white.withOpacity(0.5),
+      elevation: 6.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Constants.cardBorderRadius)),
+      color: Colors.white.withOpacity(0.95),
       shadowColor: Constants.primaryColor.withOpacity(0.3),
+      margin: const EdgeInsets.symmetric(vertical: Constants.smallSpacingForLessons / 2),
       child: InkWell(
         onTap: () => _navigate(context),
-        borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
-        child: LessonContent(
-          subject: subject,
-          lesson: lesson,
-          isActivated: isLessonActivated,
-        ),
+        borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
+        child: LessonContent(lesson: lesson),
       ),
     );
   }
-
-  void _navigate(BuildContext context) {
-    if (!isLessonActivated) {
-      context.push(
-        '/activation',
-        extra: {'subject': subject, 'unit': unit, 'lesson': lesson},
-      );
-    } else {
-      developer.log('Navigating to activated lesson ${lesson.id}');
-      context.push(
-        '/activated-lesson/${lesson.id}',
-        extra: {'subject': subject, 'unit': unit, 'lesson': lesson},
-      );
-    }
-  }
 }
 
+// تعليق: ويدجت لعرض محتوى الدرس (العنوان وحالة التفعيل)
 class LessonContent extends StatelessWidget {
-  final Subject subject;
   final Lesson lesson;
-  final bool isActivated;
 
-  const LessonContent({
-    super.key,
-    required this.subject,
-    required this.lesson,
-    required this.isActivated,
-  });
+  const LessonContent({super.key, required this.lesson});
 
   @override
   Widget build(BuildContext context) {
@@ -275,73 +270,79 @@ class LessonContent extends StatelessWidget {
       padding: Constants.cardPadding,
       child: Row(
         children: [
-          LessonIcon(subject: subject, isActivated: isActivated),
+          LessonIcon(isActivated: lesson.isActivated),
           const SizedBox(width: Constants.smallSpacingForLessons),
-          Expanded(
-            child: LessonTitle(lesson: lesson, isActivated: isActivated),
-          ),
+          Expanded(child: LessonTitle(lesson: lesson)),
+          ActivationStatus(isActivated: lesson.isActivated),
         ],
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض أيقونة الدرس بناءً على حالة التفعيل
 class LessonIcon extends StatelessWidget {
-  final Subject subject;
   final bool isActivated;
 
-  const LessonIcon({
-    super.key,
-    required this.subject,
-    required this.isActivated,
-  });
+  const LessonIcon({super.key, required this.isActivated});
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 25,
-      backgroundColor: Constants.primaryColor.withOpacity(
-        isActivated ? 0.2 : 0.1,
-      ),
+      radius: 20,
+      backgroundColor: isActivated ? Constants.activeColor.withOpacity(0.2) : Constants.inactiveColor.withOpacity(0.2),
       child: Icon(
-        subject.icon ?? Icons.book,
-        size: 30.0,
-        color: isActivated ? Constants.activeColor : Constants.primaryColor,
+        isActivated ? Icons.check_circle : Icons.lock,
+        color: isActivated ? Constants.activeColor : Constants.inactiveColor,
+        size: 28,
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض عنوان الدرس
 class LessonTitle extends StatelessWidget {
   final Lesson lesson;
-  final bool isActivated;
 
-  const LessonTitle({
-    super.key,
-    required this.lesson,
-    required this.isActivated,
-  });
+  const LessonTitle({super.key, required this.lesson});
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      '${'lesson'.tr()} ${lesson.title}', // "الدرس 1" (ar) أو "Lesson 1" (en)
-      style:
-          isActivated
-              ? Constants.activeTextStyle.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              )
-              : Constants.subjectTextStyle.copyWith(
-                color: Constants.primaryColor,
-              ),
-      textAlign: TextAlign.start,
-      maxLines: 2,
+      '${'lesson'.tr()} ${lesson.title}',
+      style: Constants.subjectTextStyle.copyWith(
+        color: Constants.primaryColor,
+        fontWeight: FontWeight.bold,
+      ),
+      maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 }
 
+// تعليق: ويدجت لعرض حالة تفعيل الدرس
+class ActivationStatus extends StatelessWidget {
+  final bool isActivated;
+
+  const ActivationStatus({super.key, required this.isActivated});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActivated ? Constants.activeColor : Constants.inactiveColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        isActivated ? 'activated'.tr() : 'locked'.tr(),
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
+    );
+  }
+}
+
+// تعليق: ويدجت لعرض رسالة خطأ عند فشل تحميل الدروس
 class ErrorMessage extends StatelessWidget {
   final String message;
 
@@ -351,15 +352,14 @@ class ErrorMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        message, // رسالة الخطأ: يجب أن تكون مترجمة
-        style: Constants.descriptionTextStyle.copyWith(
-          color: Constants.errorColorForCreateAccount,
-        ),
+        message,
+        style: Constants.descriptionTextStyle.copyWith(color: Constants.errorColorForCreateAccount),
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض رسالة عند عدم وجود دروس متاحة
 class EmptyMessage extends StatelessWidget {
   const EmptyMessage({super.key});
 
@@ -367,8 +367,7 @@ class EmptyMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'no_lessons_available'
-            .tr(), // "لا توجد دروس متاحة" (ar) أو "No lessons available" (en)
+        'no_lessons_available'.tr(),
         style: Constants.descriptionTextStyle.copyWith(color: Colors.grey),
       ),
     );

@@ -111,5 +111,12 @@
   "call": "Call",
   "starting_video_call": "Starting video call",
   "cannot_start_call_now": "Cannot start call now, please wait until the session time",
-  "postponed": "Postponed"
+  "postponed": "Postponed",
+  "please_select_all": "Please select subject, unit, and lesson",
+  "complete_lesson": "Complete Lesson",
+  "quiz_passed_score": "You passed! Your score: {0}%",
+  "quiz_failed_score": "You failed! Your score: {0}%. Please rewatch the video",
+  "please_answer_all_questions": "Please answer all questions", 
+  "quiz_failed": "Quiz Failed",
+  "would_you_like_to_retry": "Would you like to retry?" 
 }

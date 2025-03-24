@@ -1,3 +1,4 @@
+import 'package:estapps/Features/my_lessons/data/models/subject.dart';
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
 import 'package:estapps/constants.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +24,17 @@ class _LessonSectionScreenState extends State<LessonSectionScreen> {
   String? _errorMessage;
   bool _isFullScreen = false;
   bool _isVideoCompleted = false;
+  late final LessonsCubit _lessonsCubit;
 
   @override
   void initState() {
     super.initState();
+    _lessonsCubit = context.read<LessonsCubit>(); // الحصول على LessonsCubit
     _initializeVideo();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   void _initializeVideo() {
@@ -52,20 +58,22 @@ class _LessonSectionScreenState extends State<LessonSectionScreen> {
       }
       developer.log('Using temporary video for section ${section.id}');
       _videoController = VideoPlayerController.asset('assets/test.mp4')
-        ..initialize().then((_) {
-          developer.log('Video player initialized for section ${section.id}');
-          if (mounted) {
-            setState(() {});
-            _videoController.play();
-            _videoController.addListener(_checkVideoCompletion);
-          }
-        }).catchError((e) {
-          developer.log('Error initializing video player: $e');
-          setState(() {
-            _hasError = true;
-            _errorMessage = 'error_loading_video'.tr(args: [e.toString()]);
-          });
-        });
+        ..initialize()
+            .then((_) {
+              developer.log('Video player initialized for section ${section.id}');
+              if (mounted) {
+                setState(() {});
+                _videoController.play();
+                _videoController.addListener(_checkVideoCompletion);
+              }
+            })
+            .catchError((e) {
+              developer.log('Error initializing video player: $e');
+              setState(() {
+                _hasError = true;
+                _errorMessage = 'error_loading_video'.tr(args: [e.toString()]);
+              });
+            });
     } catch (e, stackTrace) {
       developer.log('LessonSectionScreen: Error initializing video player: $e');
       developer.log('Stack trace: $stackTrace');
@@ -80,7 +88,10 @@ class _LessonSectionScreenState extends State<LessonSectionScreen> {
   void dispose() {
     _videoController.removeListener(_checkVideoCompletion);
     _videoController.dispose();
-    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     super.dispose();
   }
 
@@ -108,13 +119,99 @@ class _LessonSectionScreenState extends State<LessonSectionScreen> {
     setState(() {
       _isFullScreen = !_isFullScreen;
       if (_isFullScreen) {
-        SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
       } else {
-        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+        ]);
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       }
     });
+  }
+
+  void _navigateToQuiz(BuildContext context, Section section) {
+    if (!context.mounted) return;
+
+    final subject = widget.args['subject'] as Subject?;
+    final unit = widget.args['unit'] as Unit?;
+    final lesson = widget.args['lesson'] as Lesson?;
+
+    if (subject == null || unit == null || lesson == null) {
+      developer.log('Missing required navigation data');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Missing required data for navigation')),
+      );
+      return;
+    }
+
+    // تمرير LessonsCubit مع البيانات
+    context.push(
+      '/my-lessons/quiz',
+      extra: {
+        'subject': subject,
+        'unit': unit,
+        'lesson': lesson,
+        'section': section,
+        'lessonsCubit': _lessonsCubit,
+      },
+    ).then((result) {
+      if (result == true && context.mounted) {
+        if (lesson.id != null) {
+          context.pushReplacement(
+            '/my-lessons/activated-lesson/${lesson.id}',
+            extra: {
+              'subject': subject,
+              'unit': unit,
+              'lesson': lesson,
+              'lessonsCubit': _lessonsCubit,
+            },
+          );
+        } else {
+          developer.log('Lesson ID is null, cannot navigate to activated lesson');
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid lesson ID')),
+          );
+        }
+      } else if (result == false && context.mounted) {
+        developer.log('Quiz failed, offering retry option');
+        _showRetryDialog(context);
+      }
+    }).catchError((e) {
+      developer.log('Navigation error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Navigation error: ${e.toString()}')),
+        );
+      }
+    });
+  }
+
+  void _showRetryDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('quiz_failed'.tr()),
+        content: Text('would_you_like_to_retry'.tr()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('no'.tr()),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _navigateToQuiz(context, widget.args['section'] as Section);
+            },
+            child: Text('yes'.tr()),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -129,82 +226,65 @@ class _LessonSectionScreenState extends State<LessonSectionScreen> {
     }
 
     return Scaffold(
-      appBar: _isFullScreen ? null : AppBarWidget(section: section),
-      body: Stack(
-        children: [
-          const GradientBackground(),
-          SafeArea(
-            child: _isFullScreen
-                ? FullScreenVideo(
-                    controller: _videoController,
-                    toggleFullScreen: _toggleFullScreen,
-                    seekForward: _seekForward,
-                    seekBackward: _seekBackward,
-                  )
-                : VideoContent(
-                    controller: _videoController,
-                    hasError: _hasError,
-                    errorMessage: _errorMessage,
-                    isVideoCompleted: _isVideoCompleted,
-                    retry: () => setState(() {
-                      _hasError = false;
-                      _errorMessage = null;
-                      _initializeVideo();
-                    }),
-                    toggleFullScreen: _toggleFullScreen,
-                    seekForward: _seekForward,
-                    seekBackward: _seekBackward,
-                    navigateToQuiz: () => _navigateToQuiz(context, section),
-                    subject: subject,
-                    unit: unit,
-                    lesson: lesson,
-                    section: section,
-                  ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Constants.primaryColor.withOpacity(0.9),
+              Constants.secondaryColor.withOpacity(0.6),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-        ],
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  '${'section'.tr()} ${section.title}',
+                  style: Constants.titleTextStyle.copyWith(
+                    color: Constants.backgroundColor,
+                    fontSize: 24,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              Expanded(
+                child: _isFullScreen
+                    ? FullScreenVideo(
+                        controller: _videoController,
+                        toggleFullScreen: _toggleFullScreen,
+                        seekForward: _seekForward,
+                        seekBackward: _seekBackward,
+                      )
+                    : VideoContent(
+                        controller: _videoController,
+                        hasError: _hasError,
+                        errorMessage: _errorMessage,
+                        isVideoCompleted: _isVideoCompleted,
+                        retry: () => setState(() {
+                          _hasError = false;
+                          _errorMessage = null;
+                          _initializeVideo();
+                        }),
+                        toggleFullScreen: _toggleFullScreen,
+                        seekForward: _seekForward,
+                        seekBackward: _seekBackward,
+                        navigateToQuiz: () => _navigateToQuiz(context, section),
+                        subject: subject,
+                        unit: unit,
+                        lesson: lesson,
+                        section: section,
+                      ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
-
-  void _navigateToQuiz(BuildContext context, Section section) {
-    context.push('/quiz', extra: {
-      'subject': widget.args['subject'],
-      'unit': widget.args['unit'],
-      'lesson': widget.args['lesson'],
-      'section': section,
-    }).then((result) {
-      if (result == true && mounted) {
-        context.pushReplacement(
-          '/activated-lesson/${widget.args['lesson'].id}',
-          extra: {
-            'subject': widget.args['subject'],
-            'unit': widget.args['unit'],
-            'lesson': widget.args['lesson'],
-          },
-        );
-      }
-    });
-  }
-}
-
-class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
-  final Section section;
-
-  const AppBarWidget({super.key, required this.section});
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      title: Text(
-        '${'section'.tr()} ${section.title}', // "القسم: Introduction" (ar) أو "Section: Introduction" (en)
-        style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor),
-      ),
-      backgroundColor: Constants.primaryColor.withOpacity(0.9),
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
 class GradientBackground extends StatelessWidget {
@@ -217,11 +297,10 @@ class GradientBackground extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Constants.primaryColor.withOpacity(0.9),
-            Constants.primaryColor.withOpacity(0.5),
+            Constants.secondaryColor.withOpacity(0.6),
           ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.1, 1.0],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
     );
@@ -236,7 +315,7 @@ class InvalidDataOverlay extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Text(
-          'missing_required_data'.tr(), // "البيانات المطلوبة مفقودة" (ar) أو "Missing required data" (en)
+          'missing_required_data'.tr(),
           style: const TextStyle(color: Colors.red),
         ),
       ),
@@ -260,37 +339,34 @@ class FullScreenVideo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.bottomCenter,
-      children: [
-        controller.value.isInitialized
-            ? SizedBox.expand(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: controller.value.size.width,
-                    height: controller.value.size.height,
-                    child: VideoPlayer(controller),
-                  ),
-                ),
-              )
-            : const Center(child: CircularProgressIndicator()),
-        Positioned(
-          top: 10,
-          right: 10,
-          child: IconButton(
-            icon: const Icon(Icons.fullscreen_exit, color: Colors.white),
-            onPressed: toggleFullScreen,
+    return Container(
+      color: Colors.black,
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          controller.value.isInitialized
+              ? AspectRatio(
+                  aspectRatio: controller.value.aspectRatio,
+                  child: VideoPlayer(controller),
+                )
+              : const Center(child: CircularProgressIndicator()),
+          Positioned(
+            top: 10,
+            right: 10,
+            child: IconButton(
+              icon: const Icon(Icons.fullscreen_exit, color: Colors.white),
+              onPressed: toggleFullScreen,
+            ),
           ),
-        ),
-        ControlBar(
-          controller: controller,
-          seekForward: seekForward,
-          seekBackward: seekBackward,
-          toggleFullScreen: toggleFullScreen,
-          isFullScreen: true,
-        ),
-      ],
+          ControlBar(
+            controller: controller,
+            seekForward: seekForward,
+            seekBackward: seekBackward,
+            toggleFullScreen: toggleFullScreen,
+            isFullScreen: true,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -329,13 +405,16 @@ class VideoContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: Center(
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
             child: Card(
               elevation: Constants.cardElevation,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Constants.cardBorderRadius)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
+              ),
               color: Constants.cardBackgroundColor,
               child: Padding(
                 padding: EdgeInsets.all(Constants.activationCardPadding),
@@ -344,7 +423,12 @@ class VideoContent extends StatelessWidget {
                   children: [
                     hasError
                         ? ErrorDisplay(errorMessage: errorMessage, retry: retry)
-                        : VideoPlayerWidget(controller: controller),
+                        : AspectRatio(
+                            aspectRatio: controller.value.isInitialized
+                                ? controller.value.aspectRatio
+                                : 16 / 9,
+                            child: VideoPlayer(controller),
+                          ),
                     const SizedBox(height: Constants.smallSpacingForLessons),
                     ControlBar(
                       controller: controller,
@@ -364,8 +448,8 @@ class VideoContent extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -374,22 +458,30 @@ class ErrorDisplay extends StatelessWidget {
   final String? errorMessage;
   final VoidCallback retry;
 
-  const ErrorDisplay({super.key, required this.errorMessage, required this.retry});
+  const ErrorDisplay({
+    super.key,
+    required this.errorMessage,
+    required this.retry,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Text(
-          'failed_to_load_video'.tr(args: [errorMessage ?? 'unknown_error'.tr()]), // "فشل في تحميل الفيديو" (ar) أو "Failed to load video" (en)
+          'failed_to_load_video'.tr(
+            args: [errorMessage ?? 'unknown_error'.tr()],
+          ),
           style: const TextStyle(color: Colors.red),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
         ElevatedButton(
           onPressed: retry,
-          style: ElevatedButton.styleFrom(backgroundColor: Constants.primaryColor),
-          child: Text('retry'.tr()), // "إعادة المحاولة" (ar) أو "Retry" (en)
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Constants.primaryColor,
+          ),
+          child: Text('retry'.tr()),
         ),
       ],
     );
@@ -502,7 +594,7 @@ class EndViewingButton extends StatelessWidget {
         padding: Constants.buttonPadding,
         disabledBackgroundColor: Constants.inactiveColor,
       ),
-      child: Text('end_viewing'.tr(), style: Constants.buttonTextStyle), // "إنهاء المشاهدة" (ar) أو "End Viewing" (en)
+      child: Text('end_viewing'.tr(), style: Constants.buttonTextStyle),
     );
   }
 }

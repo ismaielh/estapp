@@ -1,3 +1,5 @@
+// lib/Features/my_lessons/presentation/view/units_screen.dart
+import 'package:estapps/Features/my_lessons/data/models/subject.dart';
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
 import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_state.dart';
 import 'package:estapps/constants.dart';
@@ -7,30 +9,37 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'dart:developer' as developer;
 
+// تعليق: شاشة الوحدات لمادة معينة، تعرض قائمة الوحدات مع حالة التفعيل بناءً على الدروس
 class UnitsScreen extends StatelessWidget {
-  final Map<String, dynamic> args;
+  final Subject subject;
+  final LessonsCubit lessonsCubit;
 
-  const UnitsScreen({super.key, required this.args});
+  const UnitsScreen({
+    super.key,
+    required this.subject,
+    required this.lessonsCubit,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final subject = args['subject'] as Subject?;
-    return Scaffold(
-      appBar: AppBarWidget(subject: subject),
-      body: Stack(
-        children: [
-          const GradientBackground(),
-          subject == null
-              ? const InvalidDataOverlay()
-              : MainContent(subject: subject),
-        ],
+    return BlocProvider.value(
+      value: lessonsCubit, // تعليق: تمرير LessonsCubit الموجود لإدارة الحالة
+      child: Scaffold(
+        appBar: AppBarWidget(subject: subject),
+        body: Stack(
+          children: [
+            const GradientBackground(), // تعليق: خلفية تدرجية لتحسين الشكل
+            MainContent(subject: subject),
+          ],
+        ),
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض شريط التطبيق بعنوان المادة
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
-  final Subject? subject;
+  final Subject subject;
 
   const AppBarWidget({super.key, required this.subject});
 
@@ -38,16 +47,8 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(
-        subject?.title ??
-            'units_title'
-                .tr(), // عنوان الوحدات: اسم المادة أو "الوحدات" (ar) أو "Units" (en)
-        style: Constants.titleTextStyle.copyWith(
-          color: Colors.white,
-          fontSize: 24,
-          shadows: const [
-            Shadow(color: Colors.black26, offset: Offset(1, 1), blurRadius: 3),
-          ],
-        ),
+        '${'subject'.tr()} ${subject.title}',
+        style: Constants.titleTextStyle.copyWith(color: Constants.backgroundColor),
       ),
       backgroundColor: Constants.primaryColor.withOpacity(0.9),
       elevation: 4,
@@ -58,6 +59,7 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
+// تعليق: ويدجت لعرض خلفية تدرجية تمتد عبر الشاشة
 class GradientBackground extends StatelessWidget {
   const GradientBackground({super.key});
 
@@ -68,37 +70,17 @@ class GradientBackground extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Constants.primaryColor.withOpacity(0.9),
-            Constants.primaryColor.withOpacity(0.5),
+            Constants.secondaryColor.withOpacity(0.6),
           ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.1, 1.0],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
     );
   }
 }
 
-class InvalidDataOverlay extends StatelessWidget {
-  const InvalidDataOverlay({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    developer.log('UnitsScreen: Invalid subject data');
-    return Center(
-      child: Text(
-        'invalid_subject_data'
-            .tr(), // "بيانات المادة غير صالحة" (ar) أو "Invalid subject data" (en)
-        style: const TextStyle(
-          color: Colors.red,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-}
-
+// تعليق: ويدجت لعرض المحتوى الرئيسي، يحتوي على قسم الوحدات
 class MainContent extends StatelessWidget {
   final Subject subject;
 
@@ -108,37 +90,19 @@ class MainContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Column(
-        children: [const SectionHeader(), UnitsGrid(subject: subject)],
+        children: [
+          UnitsSection(subject: subject), // تعليق: قسم عرض الوحدات
+        ],
       ),
     );
   }
 }
 
-class SectionHeader extends StatelessWidget {
-  const SectionHeader({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: Constants.sectionPadding,
-      child: Text(
-        'units_title'.tr(), // "الوحدات" (ar) أو "Units" (en)
-        style: Constants.titleTextStyle.copyWith(
-          color: Colors.white,
-          fontSize: 26,
-          shadows: const [
-            Shadow(color: Colors.black26, offset: Offset(2, 2), blurRadius: 4),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class UnitsGrid extends StatelessWidget {
+// تعليق: ويدجت لعرض قسم الوحدات بناءً على حالة LessonsCubit
+class UnitsSection extends StatelessWidget {
   final Subject subject;
 
-  const UnitsGrid({super.key, required this.subject});
+  const UnitsSection({super.key, required this.subject});
 
   @override
   Widget build(BuildContext context) {
@@ -146,15 +110,13 @@ class UnitsGrid extends StatelessWidget {
       child: BlocBuilder<LessonsCubit, LessonsState>(
         builder: (context, state) {
           return switch (state) {
-            LessonsLoading() => const LoadingIndicator(),
-            LessonsLoaded(subjects: var subjects) => LoadedUnits(
-              subject: subject,
-              subjects: subjects,
-            ),
-            LessonsError(message: var message) => ErrorMessage(
-              message: message,
-            ),
-            _ => const EmptyMessage(),
+            LessonsLoading() => const LoadingIndicator(), // تعليق: عرض مؤشر التحميل
+            LessonsLoaded(subjects: var subjects) => UnitsList(
+                subject: subject,
+                units: subjects.firstWhere((s) => s.id == subject.id).units,
+              ),
+            LessonsError(message: var message) => ErrorMessage(message: message),
+            _ => const EmptyMessage(), // تعليق: عرض رسالة إذا لم تكن الحالة صالحة
           };
         },
       ),
@@ -162,6 +124,7 @@ class UnitsGrid extends StatelessWidget {
   }
 }
 
+// تعليق: ويدجت لعرض مؤشر التحميل أثناء جلب البيانات
 class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({super.key});
 
@@ -175,75 +138,47 @@ class LoadingIndicator extends StatelessWidget {
   }
 }
 
-class LoadedUnits extends StatelessWidget {
+// تعليق: ويدجت لعرض قائمة الوحدات في تخطيط عمودي
+class UnitsList extends StatelessWidget {
   final Subject subject;
-  final List<Subject> subjects;
+  final List<Unit> units;
 
-  const LoadedUnits({super.key, required this.subject, required this.subjects});
+  const UnitsList({super.key, required this.subject, required this.units});
 
   @override
   Widget build(BuildContext context) {
-    final updatedSubject = subjects.firstWhere(
-      (s) => s.id == subject.id,
-      orElse: () => subject,
-    );
-    final units = updatedSubject.units;
-    developer.log(
-      'UnitsScreen: Units loaded for ${subject.title}: ${units.length}',
-    );
+    developer.log('Units loaded for subject ${subject.id}: ${units.length}');
     if (units.isEmpty) return const EmptyMessage();
-    return GridView.builder(
+    return ListView.builder(
       padding: const EdgeInsets.all(Constants.smallSpacingForLessons),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: Constants.smallSpacingForLessons,
-        mainAxisSpacing: Constants.smallSpacingForLessons,
-        childAspectRatio: 1.2,
-      ),
       itemCount: units.length,
-      itemBuilder:
-          (context, index) => UnitItem(subject: subject, unit: units[index]),
+      itemBuilder: (context, index) => UnitItem(subject: subject, unit: units[index]),
     );
   }
 }
 
+// تعليق: ويدجت لعرض عنصر وحدة فردي مع إمكانية النقر للانتقال إلى الدروس
 class UnitItem extends StatelessWidget {
   final Subject subject;
   final Unit unit;
 
   const UnitItem({super.key, required this.subject, required this.unit});
 
-  @override
-  Widget build(BuildContext context) {
-    final isUnitActivated = unit.lessons.any((lesson) => lesson.isActivated);
-    developer.log(
-      'UnitsScreen: Building unit card: ${unit.title}, activated: $isUnitActivated',
-    );
-    return Card(
-      elevation: isUnitActivated ? 8.0 : 5.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
-      ),
-      color: isUnitActivated ? Colors.white : Colors.white.withOpacity(0.5),
-      shadowColor: Constants.primaryColor.withOpacity(0.3),
-      child: InkWell(
-        onTap: () => _navigateToLessons(context, subject, unit),
-        borderRadius: BorderRadius.circular(Constants.cardBorderRadius + 4),
-        child: UnitContent(
-          subject: subject,
-          unit: unit,
-          isActivated: isUnitActivated,
-        ),
-      ),
-    );
-  }
+  // تعليق: التحقق مما إذا كان هناك درس واحد على الأقل مفعل داخل الوحدة
+  bool get _hasActivatedLesson => unit.lessons.any((lesson) => lesson.isActivated);
 
-  void _navigateToLessons(BuildContext context, Subject subject, Unit unit) {
+  // تعليق: دالة للانتقال إلى شاشة الدروس مع تمرير البيانات
+  void _navigateToLessons(BuildContext context) {
     try {
-      developer.log('UnitsScreen: Navigating to /lessons/${unit.id}');
+      final lessonsCubit = context.read<LessonsCubit>();
+      developer.log('Navigating to /my-lessons/lessons/${unit.id}');
       context.push(
-        '/lessons/${unit.id}',
-        extra: {'subject': subject, 'unit': unit},
+        '/my-lessons/lessons/${unit.id}',
+        extra: {
+          'subject': subject,
+          'unit': unit,
+          'lessonsCubit': lessonsCubit,
+        },
       );
     } catch (e) {
       developer.log('Navigation error: $e');
@@ -252,84 +187,111 @@ class UnitItem extends StatelessWidget {
       );
     }
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 6.0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Constants.cardBorderRadius)),
+      // تعليق: لون باهت إذا لم يكن هناك دروس مفعلة، لون عادي إذا كان هناك درس مفعل
+      color: _hasActivatedLesson ? Colors.white.withOpacity(0.95) : Colors.grey.withOpacity(0.5),
+      shadowColor: Constants.primaryColor.withOpacity(0.3),
+      margin: const EdgeInsets.symmetric(vertical: Constants.smallSpacingForLessons / 2),
+      child: InkWell(
+        onTap: () => _navigateToLessons(context),
+        borderRadius: BorderRadius.circular(Constants.cardBorderRadius),
+        child: UnitContent(unit: unit, isActivated: _hasActivatedLesson),
+      ),
+    );
+  }
 }
 
+// تعليق: ويدجت لعرض محتوى الوحدة (العنوان وحالة التفعيل)
 class UnitContent extends StatelessWidget {
-  final Subject subject;
   final Unit unit;
-  final bool isActivated;
+  final bool isActivated; // تعليق: تعتمد على وجود دروس مفعلة
 
-  const UnitContent({
-    super.key,
-    required this.subject,
-    required this.unit,
-    required this.isActivated,
-  });
+  const UnitContent({super.key, required this.unit, required this.isActivated});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: Constants.cardPadding,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
         children: [
-          UnitIcon(subject: subject, isActivated: isActivated),
-          const SizedBox(height: Constants.smallSpacingForLessons),
-          UnitTitle(unit: unit, isActivated: isActivated),
+          UnitIcon(isActivated: isActivated),
+          const SizedBox(width: Constants.smallSpacingForLessons),
+          Expanded(child: UnitTitle(unit: unit)),
+          ActivationStatus(isActivated: isActivated),
         ],
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض أيقونة الوحدة بناءً على حالة التفعيل
 class UnitIcon extends StatelessWidget {
-  final Subject subject;
   final bool isActivated;
 
-  const UnitIcon({super.key, required this.subject, required this.isActivated});
+  const UnitIcon({super.key, required this.isActivated});
 
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      radius: 30,
-      backgroundColor: Constants.primaryColor.withOpacity(
-        isActivated ? 0.2 : 0.1,
-      ),
+      radius: 20,
+      backgroundColor: isActivated ? Constants.activeColor.withOpacity(0.2) : Constants.inactiveColor.withOpacity(0.2),
       child: Icon(
-        subject.icon ?? Icons.book,
-        size: 40.0,
-        color: isActivated ? Constants.activeColor : Constants.primaryColor,
+        isActivated ? Icons.check_circle : Icons.lock,
+        color: isActivated ? Constants.activeColor : Constants.inactiveColor,
+        size: 28,
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض عنوان الوحدة
 class UnitTitle extends StatelessWidget {
   final Unit unit;
-  final bool isActivated;
 
-  const UnitTitle({super.key, required this.unit, required this.isActivated});
+  const UnitTitle({super.key, required this.unit});
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      '${'unit'.tr()} ${unit.title}', // "الوحدة 1" (ar) أو "Unit 1" (en)
-      style:
-          isActivated
-              ? Constants.activeTextStyle.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              )
-              : Constants.subjectTextStyle.copyWith(
-                color: Constants.primaryColor,
-              ),
-      textAlign: TextAlign.center,
+      '${'unit'.tr()} ${unit.title}',
+      style: Constants.subjectTextStyle.copyWith(
+        color: Constants.primaryColor,
+        fontWeight: FontWeight.bold,
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     );
   }
 }
 
+// تعليق: ويدجت لعرض حالة تفعيل الوحدة
+class ActivationStatus extends StatelessWidget {
+  final bool isActivated;
+
+  const ActivationStatus({super.key, required this.isActivated});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isActivated ? Constants.activeColor : Constants.inactiveColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        isActivated ? 'activated'.tr() : 'locked'.tr(),
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
+    );
+  }
+}
+
+// تعليق: ويدجت لعرض رسالة خطأ عند فشل تحميل الوحدات
 class ErrorMessage extends StatelessWidget {
   final String message;
 
@@ -339,15 +301,14 @@ class ErrorMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        message, // رسالة الخطأ: يجب أن تكون مترجمة
-        style: Constants.descriptionTextStyle.copyWith(
-          color: Constants.errorColorForCreateAccount,
-        ),
+        message,
+        style: Constants.descriptionTextStyle.copyWith(color: Constants.errorColorForCreateAccount),
       ),
     );
   }
 }
 
+// تعليق: ويدجت لعرض رسالة عند عدم وجود وحدات متاحة
 class EmptyMessage extends StatelessWidget {
   const EmptyMessage({super.key});
 
@@ -355,8 +316,7 @@ class EmptyMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Text(
-        'no_units_available'
-            .tr(), // "لا توجد وحدات متاحة" (ar) أو "No units available" (en)
+        'no_units_available'.tr(),
         style: Constants.descriptionTextStyle.copyWith(color: Colors.grey),
       ),
     );

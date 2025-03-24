@@ -1,126 +1,21 @@
-import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_state.dart';
+// lib/Features/my_lessons/presentation/manager/cubit/lessons_cubit.dart
+import 'package:bloc/bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:estapps/Features/my_lessons/data/models/subject.dart';
 import 'package:flutter/material.dart';
+import 'lessons_state.dart';
 import 'dart:developer' as developer;
 
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-class Subject {
-  final String id;
-  final String title;
-  final IconData? icon;
-  final List<Unit> units;
-
-  const Subject({
-    required this.id,
-    required this.title,
-    this.icon,
-    required this.units,
-  });
-
-  Subject copyWith({List<Unit>? units}) {
-    return Subject(
-      id: id,
-      title: title,
-      icon: icon,
-      units: units ?? this.units,
-    );
-  }
-}
-
-class Unit {
-  final String id;
-  final String title;
-  final List<Lesson> lessons;
-  final bool isActivated;
-
-  const Unit({
-    required this.id,
-    required this.title,
-    required this.lessons,
-    this.isActivated = false,
-  });
-
-  Unit copyWith({
-    String? id,
-    String? title,
-    List<Lesson>? lessons,
-    bool? isActivated,
-  }) {
-    return Unit(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      lessons: lessons ?? this.lessons,
-      isActivated: isActivated ?? this.isActivated,
-    );
-  }
-}
-
-class Lesson {
-  final String id;
-  final String title;
-  final List<Section> sections;
-  final bool isActivated;
-
-  const Lesson({
-    required this.id,
-    required this.title,
-    required this.sections,
-    this.isActivated = false,
-  });
-
-  Lesson copyWith({
-    String? id,
-    String? title,
-    List<Section>? sections,
-    bool? isActivated,
-  }) {
-    return Lesson(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      sections: sections ?? this.sections,
-      isActivated: isActivated ?? this.isActivated,
-    );
-  }
-}
-
-class Section {
-  final String id;
-  final String title;
-  final bool isCompleted;
-  final bool isActivated;
-  final String videoId;
-
-  const Section({
-    required this.id,
-    required this.title,
-    this.isCompleted = false,
-    this.isActivated = false,
-    required this.videoId,
-  });
-
-  Section copyWith({
-    String? id,
-    String? title,
-    bool? isCompleted,
-    bool? isActivated,
-    String? videoId,
-  }) {
-    return Section(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      isCompleted: isCompleted ?? this.isCompleted,
-      isActivated: isActivated ?? this.isActivated,
-      videoId: videoId ?? this.videoId,
-    );
-  }
-}
-
+// تعليق: كلاس لإدارة حالة الدروس باستخدام Cubit، يتم إنشاؤه وإغلاقه مع صفحة "دروسي"
 class LessonsCubit extends Cubit<LessonsState> {
-  LessonsCubit() : super(const LessonsInitial());
+  // تعليق: تهيئة Cubit بحالة البداية
+  LessonsCubit() : super(LessonsInitial());
 
+  // تعليق: دالة لتحميل قائمة المواد عند فتح صفحة "دروسي"
   void loadSubjects() {
-    emit(const LessonsLoading());
+    emit(LessonsLoading()); // تعليق: إصدار حالة التحميل أثناء جلب البيانات
     try {
+      // تعليق: قائمة المواد الافتراضية للتجربة (يمكن استبدالها ببيانات من API لاحقًا)
       final subjects = [
         Subject(
           id: 'subject1',
@@ -135,17 +30,8 @@ class LessonsCubit extends Cubit<LessonsState> {
                   id: 'lesson1',
                   title: '1',
                   sections: [
-                    Section(
-                      id: 'sec1',
-                      title: 'Introduction',
-                      isActivated: true,
-                      videoId: 'dQw4w9WgXcQ', // معرف فيديو اختباري
-                    ),
-                    Section(
-                      id: 'sec2',
-                      title: 'Main Content',
-                      videoId: 'xyz123', // استبدل بمعرف فيديو صحيح
-                    ),
+                    Section(id: 'sec1', title: 'Introduction', isActivated: true, videoId: 'dQw4w9WgXcQ'),
+                    Section(id: 'sec2', title: 'Main Content', videoId: 'xyz123'),
                   ],
                   isActivated: true,
                 ),
@@ -153,20 +39,11 @@ class LessonsCubit extends Cubit<LessonsState> {
                   id: 'lesson2',
                   title: '2',
                   sections: [
-                    Section(
-                      id: 'sec1',
-                      title: 'Introduction',
-                      videoId: 'abc456',
-                    ),
-                    Section(
-                      id: 'sec2',
-                      title: 'Main Content',
-                      videoId: 'def789',
-                    ),
+                    Section(id: 'sec1', title: 'Introduction', videoId: 'abc456'),
+                    Section(id: 'sec2', title: 'Main Content', videoId: 'def789'),
                   ],
                 ),
               ],
-              isActivated: false,
             ),
             Unit(
               id: 'unit2',
@@ -176,36 +53,19 @@ class LessonsCubit extends Cubit<LessonsState> {
                   id: 'lesson3',
                   title: '3',
                   sections: [
-                    Section(
-                      id: 'sec1',
-                      title: 'Introduction',
-                      videoId: 'ghi012',
-                    ),
-                    Section(
-                      id: 'sec2',
-                      title: 'Main Content',
-                      videoId: 'jkl345',
-                    ),
+                    Section(id: 'sec1', title: 'Introduction', videoId: 'ghi012'),
+                    Section(id: 'sec2', title: 'Main Content', videoId: 'jkl345'),
                   ],
                 ),
                 Lesson(
                   id: 'lesson4',
                   title: '4',
                   sections: [
-                    Section(
-                      id: 'sec1',
-                      title: 'Introduction',
-                      videoId: 'mno678',
-                    ),
-                    Section(
-                      id: 'sec2',
-                      title: 'Main Content',
-                      videoId: 'pqr901',
-                    ),
+                    Section(id: 'sec1', title: 'Introduction', videoId: 'mno678'),
+                    Section(id: 'sec2', title: 'Main Content', videoId: 'pqr901'),
                   ],
                 ),
               ],
-              isActivated: false,
             ),
           ],
         ),
@@ -222,213 +82,153 @@ class LessonsCubit extends Cubit<LessonsState> {
                   id: 'lesson5',
                   title: '5',
                   sections: [
-                    Section(
-                      id: 'sec1',
-                      title: 'Introduction',
-                      videoId: 'stu234',
-                    ),
-                    Section(
-                      id: 'sec2',
-                      title: 'Main Content',
-                      videoId: 'vwx567',
-                    ),
+                    Section(id: 'sec1', title: 'Introduction', videoId: 'stu234'),
+                    Section(id: 'sec2', title: 'Main Content', videoId: 'vwx567'),
                   ],
                 ),
                 Lesson(
                   id: 'lesson6',
                   title: '6',
                   sections: [
-                    Section(
-                      id: 'sec1',
-                      title: 'Introduction',
-                      videoId: 'yza890',
-                    ),
-                    Section(
-                      id: 'sec2',
-                      title: 'Main Content',
-                      videoId: 'bcd123',
-                    ),
+                    Section(id: 'sec1', title: 'Introduction', videoId: 'yza890'),
+                    Section(id: 'sec2', title: 'Main Content', videoId: 'bcd123'),
                   ],
                 ),
               ],
-              isActivated: false,
             ),
           ],
         ),
       ];
       if (subjects.isEmpty) {
         developer.log('LessonsCubit: No subjects loaded');
-        emit(const LessonsError(message: 'No subjects available'));
+        emit(LessonsError(message: 'no_subjects_available'.tr())); // تعليق: إصدار حالة خطأ إذا لم تُوجد مواد
         return;
       }
-      for (var subject in subjects) {
-        if (subject.units.isEmpty) {
-          developer.log('LessonsCubit: Subject ${subject.title} has no units');
-        }
-        for (var unit in subject.units) {
-          if (unit.lessons.isEmpty) {
-            developer.log('LessonsCubit: Unit ${unit.title} in ${subject.title} has no lessons');
-          }
-          for (var lesson in unit.lessons) {
-            if (lesson.isActivated && lesson.sections.isNotEmpty && !lesson.sections[0].isActivated) {
-              final updatedSections = lesson.sections.asMap().map((index, section) {
-                if (index == 0) {
-                  return MapEntry(index, section.copyWith(isActivated: true));
-                }
-                return MapEntry(index, section);
-              }).values.toList();
-              unit.lessons[unit.lessons.indexOf(lesson)] = lesson.copyWith(sections: updatedSections);
-              developer.log('LessonsCubit: Activated first section for lesson ${lesson.id}');
-            }
-          }
-        }
-      }
-      developer.log('LessonsCubit: Subjects loaded: ${subjects.length}');
-      emit(LessonsLoaded(subjects: subjects));
+      emit(LessonsLoaded(subjects: subjects)); // تعليق: إصدار حالة النجاح مع قائمة المواد
     } catch (e) {
       developer.log('LessonsCubit: Failed to load subjects: $e');
-      emit(LessonsError(message: 'Failed to load subjects: $e'));
+      emit(LessonsError(message: 'Failed to load subjects: $e')); // تعليق: إصدار حالة خطأ في حالة الفشل
     }
   }
 
+  // تعليق: دالة لتفعيل وحدة معينة بناءً على معرفها
   void activateUnit(String unitId) {
     if (state is LessonsLoaded) {
       final currentState = state as LessonsLoaded;
-      try {
-        final updatedSubjects = currentState.subjects.map((subject) {
-          final updatedUnits = subject.units.map((unit) {
-            if (unit.id == unitId) {
-              if (unit.lessons.isEmpty) {
-                developer.log('LessonsCubit: Unit $unitId has no lessons, cannot activate');
-                return unit;
-              }
-              developer.log('LessonsCubit: Activating unit: ${unit.id}');
-              return unit.copyWith(isActivated: true);
-            }
-            return unit;
-          }).toList();
-          return subject.copyWith(units: updatedUnits);
+      final updatedSubjects = currentState.subjects.map((subject) {
+        final updatedUnits = subject.units.map((unit) {
+          if (unit.id == unitId && !unit.isActivated) {
+            developer.log('LessonsCubit: Activating unit: ${unit.id}');
+            return unit.copyWith(isActivated: true); // تعليق: تفعيل الوحدة إذا لم تكن مفعلة
+          }
+          return unit;
         }).toList();
-        emit(LessonsLoaded(subjects: updatedSubjects));
-      } catch (e) {
-        developer.log('LessonsCubit: Error activating unit $unitId: $e');
-        emit(LessonsError(message: 'Error activating unit: $e'));
-      }
+        return subject.copyWith(units: updatedUnits);
+      }).toList();
+      emit(LessonsLoaded(subjects: updatedSubjects)); // تعليق: تحديث الحالة بعد التفعيل
     }
   }
 
+  // تعليق: دالة لتفعيل درس معين داخل وحدة
   void activateLesson(String unitId, String lessonId) {
     if (state is LessonsLoaded) {
       final currentState = state as LessonsLoaded;
-      try {
-        final updatedSubjects = currentState.subjects.map((subject) {
-          final updatedUnits = subject.units.map((unit) {
-            if (unit.id == unitId) {
-              final updatedLessons = unit.lessons.map((lesson) {
-                if (lesson.id == lessonId) {
-                  if (lesson.sections.isEmpty) {
-                    developer.log('LessonsCubit: Lesson $lessonId has no sections, cannot activate');
-                    return lesson;
+      final updatedSubjects = currentState.subjects.map((subject) {
+        final updatedUnits = subject.units.map((unit) {
+          if (unit.id == unitId) {
+            final updatedLessons = unit.lessons.map((lesson) {
+              if (lesson.id == lessonId && !lesson.isActivated) {
+                developer.log('LessonsCubit: Activating lesson: ${lesson.id}');
+                final updatedSections = lesson.sections.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final section = entry.value;
+                  if (index == 0 && !section.isActivated) {
+                    return section.copyWith(isActivated: true); // تعليق: تفعيل القسم الأول تلقائيًا
                   }
-                  developer.log('LessonsCubit: Activating lesson: ${lesson.id}');
-                  final updatedSections = lesson.sections.asMap().map((index, section) {
-                    if (index == 0 && !section.isActivated) {
-                      return MapEntry(index, section.copyWith(isActivated: true));
-                    }
-                    return MapEntry(index, section);
-                  }).values.toList();
-                  return lesson.copyWith(isActivated: true, sections: updatedSections);
-                }
-                return lesson;
-              }).toList();
-              return unit.copyWith(lessons: updatedLessons);
-            }
-            return unit;
-          }).toList();
-          return subject.copyWith(units: updatedUnits);
+                  return section;
+                }).toList();
+                return lesson.copyWith(isActivated: true, sections: updatedSections);
+              }
+              return lesson;
+            }).toList();
+            return unit.copyWith(lessons: updatedLessons);
+          }
+          return unit;
         }).toList();
-        emit(LessonsLoaded(subjects: updatedSubjects));
-      } catch (e) {
-        developer.log('LessonsCubit: Error activating lesson $lessonId in unit $unitId: $e');
-        emit(LessonsError(message: 'Error activating lesson: $e'));
-      }
+        return subject.copyWith(units: updatedUnits);
+      }).toList();
+      emit(LessonsLoaded(subjects: updatedSubjects));
     }
   }
 
+  // تعليق: دالة لتفعيل قسم معين داخل درس
   void activateSection(String unitId, String lessonId, String sectionId) {
     if (state is LessonsLoaded) {
       final currentState = state as LessonsLoaded;
-      try {
-        final updatedSubjects = currentState.subjects.map((subject) {
-          final updatedUnits = subject.units.map((unit) {
-            if (unit.id == unitId) {
-              final updatedLessons = unit.lessons.map((lesson) {
-                if (lesson.id == lessonId) {
-                  final updatedSections = lesson.sections.map((section) {
-                    if (section.id == sectionId) {
-                      developer.log('LessonsCubit: Activating section: ${section.id}');
-                      return section.copyWith(isActivated: true);
-                    }
-                    return section;
-                  }).toList();
-                  return lesson.copyWith(sections: updatedSections);
-                }
-                return lesson;
-              }).toList();
-              return unit.copyWith(lessons: updatedLessons);
-            }
-            return unit;
-          }).toList();
-          return subject.copyWith(units: updatedUnits);
+      final updatedSubjects = currentState.subjects.map((subject) {
+        final updatedUnits = subject.units.map((unit) {
+          if (unit.id == unitId) {
+            final updatedLessons = unit.lessons.map((lesson) {
+              if (lesson.id == lessonId) {
+                final updatedSections = lesson.sections.map((section) {
+                  if (section.id == sectionId && !section.isActivated) {
+                    developer.log('LessonsCubit: Activating section: ${section.id}');
+                    return section.copyWith(isActivated: true);
+                  }
+                  return section;
+                }).toList();
+                return lesson.copyWith(sections: updatedSections);
+              }
+              return lesson;
+            }).toList();
+            return unit.copyWith(lessons: updatedLessons);
+          }
+          return unit;
         }).toList();
-        emit(LessonsLoaded(subjects: updatedSubjects));
-      } catch (e) {
-        developer.log('LessonsCubit: Error activating section $sectionId in lesson $lessonId: $e');
-        emit(LessonsError(message: 'Error activating section: $e'));
-      }
+        return subject.copyWith(units: updatedUnits);
+      }).toList();
+      emit(LessonsLoaded(subjects: updatedSubjects));
     }
   }
 
+  // تعليق: دالة لإكمال قسم معين وتفعيل القسم التالي إن وجد
   void completeSection(String unitId, String lessonId, String sectionId) {
     if (state is LessonsLoaded) {
       final currentState = state as LessonsLoaded;
-      try {
-        final updatedSubjects = currentState.subjects.map((subject) {
-          final updatedUnits = subject.units.map((unit) {
-            if (unit.id == unitId) {
-              final updatedLessons = unit.lessons.map((lesson) {
-                if (lesson.id == lessonId) {
-                  final updatedSections = lesson.sections.asMap().map((index, section) {
-                    if (section.id == sectionId) {
-                      developer.log('LessonsCubit: Completing section: ${section.id}');
-                      return MapEntry(index, section.copyWith(isCompleted: true));
-                    }
-                    return MapEntry(index, section);
-                  }).values.toList();
-
-                  final sectionIndex = lesson.sections.indexWhere((s) => s.id == sectionId);
-                  if (sectionIndex >= 0 && sectionIndex + 1 < lesson.sections.length) {
-                    final nextSection = lesson.sections[sectionIndex + 1];
-                    if (!nextSection.isActivated) {
-                      developer.log('LessonsCubit: Activating next section: ${nextSection.id}');
-                      updatedSections[sectionIndex + 1] = nextSection.copyWith(isActivated: true);
-                    }
+      final updatedSubjects = currentState.subjects.map((subject) {
+        final updatedUnits = subject.units.map((unit) {
+          if (unit.id == unitId) {
+            final updatedLessons = unit.lessons.map((lesson) {
+              if (lesson.id == lessonId) {
+                final sectionIndex = lesson.sections.indexWhere((s) => s.id == sectionId);
+                if (sectionIndex == -1) return lesson;
+                final updatedSections = lesson.sections.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final section = entry.value;
+                  if (section.id == sectionId && !section.isCompleted) {
+                    developer.log('LessonsCubit: Completing section: ${section.id}');
+                    return section.copyWith(isCompleted: true);
                   }
-                  return lesson.copyWith(sections: updatedSections);
+                  return section;
+                }).toList();
+                if (sectionIndex + 1 < lesson.sections.length) {
+                  final nextSection = lesson.sections[sectionIndex + 1];
+                  if (!nextSection.isActivated && !nextSection.isCompleted) {
+                    developer.log('LessonsCubit: Activating next section: ${nextSection.id}');
+                    updatedSections[sectionIndex + 1] = nextSection.copyWith(isActivated: true);
+                  }
                 }
-                return lesson;
-              }).toList();
-              return unit.copyWith(lessons: updatedLessons);
-            }
-            return unit;
-          }).toList();
-          return subject.copyWith(units: updatedUnits);
+                return lesson.copyWith(sections: updatedSections);
+              }
+              return lesson;
+            }).toList();
+            return unit.copyWith(lessons: updatedLessons);
+          }
+          return unit;
         }).toList();
-        emit(LessonsLoaded(subjects: updatedSubjects));
-      } catch (e) {
-        developer.log('LessonsCubit: Error completing section $sectionId in lesson $lessonId: $e');
-        emit(LessonsError(message: 'Error completing section: $e'));
-      }
+        return subject.copyWith(units: updatedUnits);
+      }).toList();
+      emit(LessonsLoaded(subjects: updatedSubjects));
     }
   }
 }

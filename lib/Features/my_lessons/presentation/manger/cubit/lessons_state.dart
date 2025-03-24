@@ -1,25 +1,24 @@
-import 'package:estapps/Features/my_lessons/presentation/manger/cubit/lessons_cubit.dart';
 
-abstract class LessonsState {
-  const LessonsState();
-}
+import 'package:estapps/Features/my_lessons/data/models/subject.dart';
+
+abstract class LessonsState {}
 
 class LessonsInitial extends LessonsState {
-  const LessonsInitial();
+  LessonsInitial();
 }
 
 class LessonsLoading extends LessonsState {
-  const LessonsLoading();
+  LessonsLoading();
 }
 
 class LessonsLoaded extends LessonsState {
   final List<Subject> subjects;
 
-  const LessonsLoaded({required this.subjects});
+  LessonsLoaded({required this.subjects});
 }
 
 class LessonsError extends LessonsState {
   final String message;
 
-  const LessonsError({required this.message});
+  LessonsError({required this.message});
 }
